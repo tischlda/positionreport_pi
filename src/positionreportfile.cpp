@@ -56,11 +56,11 @@ PositionReport::PositionReport(void)
 {
 }
 
-PositionReports::PositionReports(void)
+Station::Station(void)
 {
 }
 
-PositionReports::~PositionReports()
+Station::~Station()
 {
   if(m_positionReport) delete m_positionReport;
 }
@@ -72,7 +72,7 @@ PositionReportFileReader::PositionReportFileReader(void)
 {
 }
 
-PositionReportsHash* PositionReportFileReader::Read(wxString& filename)
+StationHash* PositionReportFileReader::Read(wxString& filename)
 {
   wxFileName file(filename);
   
@@ -80,12 +80,11 @@ PositionReportsHash* PositionReportFileReader::Read(wxString& filename)
     wxFileInputStream stream(filename); 
     return Read(stream);
   } else {
-    wxLogMessage(_T("Can't open file"));
     return NULL;
   }
 }
 
-PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream)
+StationHash* PositionReportFileReader::Read(wxInputStream &stream)
 {
   wxString line;
   wxString callsign;
@@ -93,11 +92,11 @@ PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream)
   double latDeg, latMin, lat, lonDeg, lonMin, lon;
   wxDateTime dateTime;
   wxString comment;
-  PositionReportsHash *positionReportsHash;
-  PositionReports *positionReports;
+  StationHash *stationHash;
+  Station *station;
   PositionReport *positionReport;
 
-  positionReportsHash = new PositionReportsHash();
+  stationHash = new StationHash();
   bool headerRead = false;
 
   wxTextInputStream text(stream);
@@ -106,7 +105,6 @@ PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream)
     line = text.ReadLine();
     
     if(!headerRead) {
-      wxLogMessage(_T("Looking for header..."));
       if(line.StartsWith(_T("CALL ")))
         headerRead = true;
     }
@@ -121,8 +119,6 @@ PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream)
              lat = (latDeg + (latMin / 60)) * (line.Mid(35, 1) == _T("N") ? 1 : -1);
         }
 
-        wxLogMessage(_T(" Lat: %f-%f"), latDeg, latMin);
-
         if(line.Mid(37, 3).ToDouble(&lonDeg) &&
            line.Mid(41, 5).ToDouble(&lonMin)) {
              lon = (lonDeg + (lonMin / 60)) * (line.Mid(46, 1) == _T("E")  ? 1 : -1);
@@ -131,8 +127,8 @@ PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream)
         dateTime.ParseDate(line.Mid(49, 16));
         comment = (line.Mid(66));
 
-        positionReports = new PositionReports();
-        positionReports->m_callsign = callsign;
+        station = new Station();
+        station->m_callsign = callsign;
 
         positionReport = new PositionReport();
         positionReport->m_distance = distance;
@@ -142,12 +138,12 @@ PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream)
         positionReport->m_latitude = lat;
         positionReport->m_longitude = lon;
 
-        positionReports->m_positionReport = positionReport;
+        station->m_positionReport = positionReport;
 
-        positionReportsHash->operator [](callsign) = positionReports;
+        stationHash->operator [](callsign) = station;
       }
     }
   }
 
-  return positionReportsHash;
+  return stationHash;
 }

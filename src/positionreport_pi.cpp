@@ -78,6 +78,7 @@ positionreport_pi::positionreport_pi(void *ppimgr)
     POSITIONREPORT_TOOL_POSITION, 0, this);
 
   m_positionReportRenderer = new PositionReportRenderer();
+  m_stationHash = NULL;
 }
 
 int positionreport_pi::Init(void)
@@ -97,7 +98,7 @@ int positionreport_pi::Init(void)
 bool positionreport_pi::DeInit(void)
 {
   if(m_pDialog) m_pDialog->Close();
-  if(m_positionReportsHash) delete m_positionReportsHash;
+  if(m_stationHash) delete m_stationHash;
 
   return true;
 }
@@ -179,9 +180,9 @@ void positionreport_pi::OnDialogClose()
 
 bool positionreport_pi::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp)
 {
-  if(m_positionReportsHash)
+  if(m_stationHash)
   {
-    return m_positionReportRenderer->RenderOverlay(pmdc, vp, m_positionReportsHash);
+    return m_positionReportRenderer->RenderOverlay(pmdc, vp, m_stationHash);
   }
   else
   {
@@ -195,12 +196,29 @@ void positionreport_pi::SetCursorLatLon(double lat, double lon)
 
 void positionreport_pi::FileSelected()
 {
-  if(m_positionReportsHash) delete m_positionReportsHash;
+  if(m_stationHash) delete m_stationHash;
 
   PositionReportFileReader reader;
 
-  m_positionReportsHash = reader.Read(m_pDialog->GetCurrentFileName());
+  m_stationHash = reader.Read(m_pDialog->GetCurrentFileName());
   m_pDialog->OnDataChanged();
+
+  RequestRefresh(m_parent_window);
+}
+
+void positionreport_pi::StationSelected()
+{
+  for(StationHash::iterator it = m_stationHash->begin(); it != m_stationHash->end(); ++it)
+  {
+    it->second->m_isSelected = false;
+  }
+
+  StationHash::iterator it = m_stationHash->find(m_pDialog->GetCurrentStationName());
+
+  if(it != m_stationHash->end())
+  {
+    it->second->m_isSelected = true;
+  }
 
   RequestRefresh(m_parent_window);
 }

@@ -69,23 +69,25 @@ public:
       wxString     m_comment;
 };
 
-class PositionReports {
+class Station {
 public:
-      PositionReports(void);
-      ~PositionReports();
+      Station(void);
+      ~Station();
 
       wxString        m_callsign;
       PositionReport  *m_positionReport;
+
+      bool m_isSelected;
 };
 
-WX_DECLARE_STRING_HASH_MAP(PositionReports*, PositionReportsHash);
+WX_DECLARE_STRING_HASH_MAP(Station*, StationHash);
 
 class PositionReportFileReader {
 public:
       PositionReportFileReader(void);
       
-      PositionReportsHash* Read(wxString& filename);
-      PositionReportsHash* Read(wxInputStream &stream);
+      StationHash* Read(wxString& filename);
+      StationHash* Read(wxInputStream &stream);
 
       static const size_t MaxFileSize = 10000;
 };
