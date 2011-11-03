@@ -63,6 +63,7 @@ public:
       double       m_latitude;
       double       m_longitude;
       double       m_distance; // in nautical miles
+      double       m_bearing; // in deg
       unsigned int m_course; // in deg
       unsigned int m_speed;  // in knots, 99=unknown
       wxString     m_comment;
@@ -78,15 +79,6 @@ public:
 };
 
 WX_DECLARE_STRING_HASH_MAP(PositionReports*, PositionReportsHash);
-
-class PositionReportRenderer {
-public:
-      PositionReportRenderer(PositionReports *positionReports);
-      bool Draw(wxMemoryDC *pmdc, PlugIn_ViewPort *vp);
-
-private:
-      bool DrawPosition(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, PositionReports *positionReports);
-};
 
 class PositionReportFileReader {
 public:

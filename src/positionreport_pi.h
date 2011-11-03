@@ -43,63 +43,63 @@
 
 #include "../../../include/ocpn_plugin.h"
 #include "positionreportfile.h"
+#include "positionreport_ui.h"
 
 #define POSITIONREPORT_TOOL_POSITION -1          // Request default positioning of toolbar tool
 
-//----------------------------------------------------------------------------------------------------------
-//    The PlugIn Class Definition
-//----------------------------------------------------------------------------------------------------------
 class PositionReportUIDialog;
+class PositionReportRenderer;
 
 class positionreport_pi : public opencpn_plugin
 {
-public:
-      positionreport_pi(void *ppimgr);
+  public:
+    positionreport_pi(void *ppimgr);
 
-//    The required PlugIn Methods
-      int Init(void);
-      bool DeInit(void);
+    int Init(void);
+    bool DeInit(void);
 
-      int GetAPIVersionMajor();
-      int GetAPIVersionMinor();
-      int GetPlugInVersionMajor();
-      int GetPlugInVersionMinor();
-      wxBitmap *GetPlugInBitmap();
-      wxString GetCommonName();
-      wxString GetShortDescription();
-      wxString GetLongDescription();
+    int GetAPIVersionMajor();
+    int GetAPIVersionMinor();
+    int GetPlugInVersionMajor();
+    int GetPlugInVersionMinor();
+    wxBitmap *GetPlugInBitmap();
+    wxString GetCommonName();
+    wxString GetShortDescription();
+    wxString GetLongDescription();
 
-//    The override PlugIn Methods
-      bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp);
-      void SetCursorLatLon(double lat, double lon);
+    bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp);
+    void SetCursorLatLon(double lat, double lon);
 
-      int GetToolbarToolCount(void);
-      void ShowPreferencesDialog( wxWindow* parent );
-      void OnToolbarToolCallback(int id);
-      void SetDialogX    (int x){ m_dialog_x = x;};
-      void SetDialogY    (int x){ m_dialog_y = x;}
-      void SetDialogSizeX(int x){ m_dialog_sx = x;}
-      void SetDialogSizeY(int x){ m_dialog_sy = x;}
+    int GetToolbarToolCount(void);
+    void ShowPreferencesDialog(wxWindow* parent);
+    void OnToolbarToolCallback(int id);
+    void SetDialogX    (int x) { m_dialog_x = x; };
+    void SetDialogY    (int x) { m_dialog_y = x; }
+    void SetDialogSizeX(int x) { m_dialog_sx = x; }
+    void SetDialogSizeY(int x) { m_dialog_sy = x; }
 
-      void OnDialogClose();
-      void SetDir(wxString dir){ m_dir = dir; }
-      void FileSelected(void);
-      PositionReportsHash* GetPositionReports(void) { return m_positionReportsHash; }
+    void OnDialogClose();
+    void SetDir(wxString dir){ m_dir = dir; }
+    void FileSelected(void);
+    PositionReportsHash* GetPositionReports(void) { return m_positionReportsHash; }
 
-private:
-      bool LoadConfig(void);
-      bool SaveConfig(void);
+  private:
+    bool LoadConfig(void);
+    bool SaveConfig(void);
 
-private:
-      wxWindow         *m_parent_window;
-      bool              m_bShowIcon;
-      int               m_leftclick_tool_id;
-      int               m_dialog_x, m_dialog_y;
-      int               m_dialog_sx, m_dialog_sy;
-      wxString          m_dir;
-      PositionReportUIDialog *m_pDialog;
-      
-      PositionReportsHash  *m_positionReportsHash;
+  private:
+    wxWindow         *m_parent_window;
+    int               m_leftclick_tool_id;
+    
+    bool              m_bShowIcon;
+    int               m_dialog_x, m_dialog_y;
+    int               m_dialog_sx, m_dialog_sy;
+    wxString          m_dir;
+    
+    PositionReportUIDialog *m_pDialog;
+    PositionReportRenderer *m_positionReportRenderer;
+    
+    PositionReportsHash  *m_positionReportsHash;
 };
 
 #endif

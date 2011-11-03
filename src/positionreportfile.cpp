@@ -52,23 +52,28 @@ static bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y)
     return FALSE;
 }
 
-PositionReport::PositionReport(void) {
+PositionReport::PositionReport(void)
+{
 }
 
-PositionReports::PositionReports(void) {
+PositionReports::PositionReports(void)
+{
 }
 
-PositionReports::~PositionReports() {
+PositionReports::~PositionReports()
+{
   if(m_positionReport) delete m_positionReport;
 }
 
 //---------------------------------------------
 // PositionReportFileReader implementation
 //---------------------------------------------
-PositionReportFileReader::PositionReportFileReader(void) {
+PositionReportFileReader::PositionReportFileReader(void)
+{
 }
 
-PositionReportsHash* PositionReportFileReader::Read(wxString& filename) {
+PositionReportsHash* PositionReportFileReader::Read(wxString& filename)
+{
   wxFileName file(filename);
   
   if(file.FileExists() && (file.GetSize() < MaxFileSize)){
@@ -80,10 +85,14 @@ PositionReportsHash* PositionReportFileReader::Read(wxString& filename) {
   }
 }
 
-PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream) {
+PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream)
+{
   wxString line;
   wxString callsign;
-  double distance;
+  double distance, bearing;
+  double latDeg, latMin, lat, lonDeg, lonMin, lon;
+  wxDateTime dateTime;
+  wxString comment;
   PositionReportsHash *positionReportsHash;
   PositionReports *positionReports;
   PositionReport *positionReport;
@@ -102,15 +111,36 @@ PositionReportsHash* PositionReportFileReader::Read(wxInputStream &stream) {
         headerRead = true;
     }
     else if(headerRead) {
-      if(!line.IsEmpty()) {
+      if(line.length() > 68) {
         callsign = line.Mid(0, 10);
         if(!line.Mid(10, 8).ToDouble(&distance)) distance = -1;
+        if(!line.Mid(21, 3).ToDouble(&bearing)) bearing = -1;
+
+        if(line.Mid(27, 2).ToDouble(&latDeg) &&
+           line.Mid(30, 5).ToDouble(&latMin)) {
+             lat = (latDeg + (latMin / 60)) * (line.Mid(35, 1) == _T("N") ? 1 : -1);
+        }
+
+        wxLogMessage(_T(" Lat: %f-%f"), latDeg, latMin);
+
+        if(line.Mid(37, 3).ToDouble(&lonDeg) &&
+           line.Mid(41, 5).ToDouble(&lonMin)) {
+             lon = (lonDeg + (lonMin / 60)) * (line.Mid(46, 1) == _T("E")  ? 1 : -1);
+        }
+
+        dateTime.ParseDate(line.Mid(49, 16));
+        comment = (line.Mid(66));
 
         positionReports = new PositionReports();
         positionReports->m_callsign = callsign;
 
         positionReport = new PositionReport();
         positionReport->m_distance = distance;
+        positionReport->m_bearing = bearing;
+        positionReport->m_comment = comment;
+        positionReport->m_dateTime = dateTime;
+        positionReport->m_latitude = lat;
+        positionReport->m_longitude = lon;
 
         positionReports->m_positionReport = positionReport;
 

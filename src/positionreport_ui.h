@@ -45,21 +45,18 @@
 
 #include "folder.xpm"
 #include "../../../include/ocpn_plugin.h"
+#include "positionreport_pi.h"
 #include "positionreportfile.h"
 
-enum {
-      ID_OK = 11001,
-      ID_CHOOSEPOSITIONREPORTDIR,
-      ID_FILESELECTED,
-      ID_NOTEBOOK,
-      ID_RAWTEXT
-};
-
-
-WX_DECLARE_OBJARRAY(wxDateTime, DateTimeArray);
-
-
 class positionreport_pi;
+
+enum {
+  ID_OK = 11001,
+  ID_CHOOSEPOSITIONREPORTDIR,
+  ID_FILESELECTED,
+  ID_NOTEBOOK,
+  ID_RAWTEXT
+};
 
 class PositionReportUIDialog: public wxDialog
 {
@@ -84,9 +81,6 @@ class PositionReportUIDialog: public wxDialog
             
             void OnDataChanged(void);
             
-            bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp);
-            int wxCALLBACK sortFiles(long, long, long);
-
             wxString GetCurrentFileName(void);
     
       private:
@@ -108,6 +102,12 @@ class PositionReportUIDialog: public wxDialog
             wxListCtrl        *m_pFileListCtrl;
             wxTextCtrl        *m_pTextCtrl;
             wxTextCtrl        *m_pRawCtrl;
+};
+
+class PositionReportRenderer
+{
+  public:
+    bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, PositionReportsHash *positionReports);
 };
 
 #endif

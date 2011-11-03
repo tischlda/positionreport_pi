@@ -44,219 +44,200 @@
 
 extern "C" DECL_EXP opencpn_plugin* create_pi(void *ppimgr)
 {
-    return (opencpn_plugin *)new positionreport_pi(ppimgr);
+  return (opencpn_plugin *)new positionreport_pi(ppimgr);
 }
 
 extern "C" DECL_EXP void destroy_pi(opencpn_plugin* p)
 {
-    delete p;
+  delete p;
 }
 
-//---------------------------------------------------------------------------------------------------------
-//
-//    PositionReport PlugIn Implementation
-//
-//---------------------------------------------------------------------------------------------------------
-
 #include "icons.h"
-
-//---------------------------------------------------------------------------------------------------------
-//
-//          PlugIn initialization and de-init
-//
-//---------------------------------------------------------------------------------------------------------
 
 positionreport_pi::positionreport_pi(void *ppimgr)
       :opencpn_plugin(ppimgr)
 {
-      // Set some default private member parameters
-      m_dialog_x = 0;
-      m_dialog_y = 0;
-      m_dialog_sx = 200;
-      m_dialog_sy = 200;
-      m_dir = wxT("");
-      m_pDialog = NULL;
-      // Create the PlugIn icons
+  m_dialog_x = 0;
+  m_dialog_y = 0;
+  m_dialog_sx = 200;
+  m_dialog_sy = 200;
+  m_dir = wxT("");
+  m_pDialog = NULL;
 
-      // Get a pointer to the opencpn display canvas, to use as a parent for the GRIB dialog
-      m_parent_window = GetOCPNCanvasWindow();
+  m_parent_window = GetOCPNCanvasWindow();
 
+  initialize_images();
 
-      // Create the PlugIn icons
-      initialize_images();
-
-      // TODO: init images
-//      _img_pi = new wxBitmap(20, 20,-1);
+  // TODO: init images
+  // _img_pi = new wxBitmap(20, 20,-1);
 
 
-      //    This PlugIn needs a toolbar icon, so request its insertion if enabled locally
-      m_leftclick_tool_id  = InsertPlugInTool(_T(""), _img_positionreport_pi, _img_positionreport_pi, wxITEM_NORMAL,
-                  _("PositionReport"), _T(""), NULL,
-                   POSITIONREPORT_TOOL_POSITION, 0, this);
+  m_leftclick_tool_id  = InsertPlugInTool(
+    _T(""), _img_positionreport_pi, _img_positionreport_pi, wxITEM_NORMAL,
+    _("PositionReport"), _T(""), NULL,
+    POSITIONREPORT_TOOL_POSITION, 0, this);
 
+  m_positionReportRenderer = new PositionReportRenderer();
 }
 
 int positionreport_pi::Init(void)
 {
-  wxLogMessage(_T("positionreport_pi::Init"));
-      AddLocaleCatalog( _T("opencpn-positionreport_pi") );
+  AddLocaleCatalog( _T("opencpn-positionreport_pi") );
 
-      //    And load the configuration items
-      LoadConfig();
+  LoadConfig();
 
-
-      return (WANTS_OVERLAY_CALLBACK |
-           WANTS_TOOLBAR_CALLBACK    |
-           INSTALLS_TOOLBAR_TOOL     |
-           WANTS_CONFIG);
+  return (
+    WANTS_OVERLAY_CALLBACK  |
+    WANTS_CURSOR_LATLON     |
+    WANTS_TOOLBAR_CALLBACK  |
+    INSTALLS_TOOLBAR_TOOL   |
+    WANTS_CONFIG);
 }
 
 bool positionreport_pi::DeInit(void)
 {
-      if(m_pDialog) m_pDialog->Close();
-      if(m_positionReportsHash) delete m_positionReportsHash;
+  if(m_pDialog) m_pDialog->Close();
+  if(m_positionReportsHash) delete m_positionReportsHash;
 
-      return true;
+  return true;
 }
 
 int positionreport_pi::GetAPIVersionMajor()
 {
-      return MY_API_VERSION_MAJOR;
+  return MY_API_VERSION_MAJOR;
 }
 
 int positionreport_pi::GetAPIVersionMinor()
 {
-      return MY_API_VERSION_MINOR;
+  return MY_API_VERSION_MINOR;
 }
 
 int positionreport_pi::GetPlugInVersionMajor()
 {
-      return PLUGIN_VERSION_MAJOR;
+  return PLUGIN_VERSION_MAJOR;
 }
 
 int positionreport_pi::GetPlugInVersionMinor()
 {
-      return PLUGIN_VERSION_MINOR;
+  return PLUGIN_VERSION_MINOR;
 }
 
 wxBitmap *positionreport_pi::GetPlugInBitmap()
 {
-      return _img_positionreport_pi;
+  return _img_positionreport_pi;
 }
 wxString positionreport_pi::GetCommonName()
 {
-      return _("PositionReport");
+  return _("PositionReport");
 }
 
 wxString positionreport_pi::GetShortDescription()
 {
-      return _("PositionReport PlugIn for OpenCPN");
+  return _("PositionReport PlugIn for OpenCPN");
 }
 
 
 wxString positionreport_pi::GetLongDescription()
 {
-      return _("PositionReport PlugIn for OpenCPN\n\
+  return _("PositionReport PlugIn for OpenCPN\n\
 Display Winlink2000 position reports.\n\
 ");
 }
 
 int positionreport_pi::GetToolbarToolCount(void)
 {
-      return 1;
+  return 1;
 }
 
-void positionreport_pi::ShowPreferencesDialog( wxWindow* parent )
+void positionreport_pi::ShowPreferencesDialog(wxWindow* parent)
 {
-      wxDialog *dialog = new wxDialog( parent, wxID_ANY, _("PositionReport Preferences"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE );
-
 }
 
 void positionreport_pi::OnToolbarToolCallback(int id)
 {
-      // show the PositionReport dialog
-      if(NULL == m_pDialog)
-      {
-            m_pDialog = new PositionReportUIDialog();
-            m_pDialog->Create ( m_parent_window, 
-                  this, 
-                  -1, 
-                  _("PositionReport Display Control"), 
-                  m_dir,
-                  wxPoint( m_dialog_x, m_dialog_y), 
-                  wxSize( m_dialog_sx, m_dialog_sy)
-            );
-      }
+  if(NULL == m_pDialog)
+  {
+    m_pDialog = new PositionReportUIDialog();
+    m_pDialog->Create (
+      m_parent_window, 
+      this, 
+      -1, 
+      _("PositionReport Display Control"), 
+      m_dir,
+      wxPoint( m_dialog_x, m_dialog_y), 
+      wxSize( m_dialog_sx, m_dialog_sy));
+  }
 
-      m_pDialog->Show();                        // Show modeless, so it stays on the screen
+  m_pDialog->Show();
 }
 
 void positionreport_pi::OnDialogClose()
 {
-      m_pDialog = NULL;
-      SaveConfig();
+  m_pDialog = NULL;
+  SaveConfig();
 }
 
-bool positionreport_pi::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp){
- return true;
+bool positionreport_pi::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp)
+{
+  if(m_positionReportsHash)
+  {
+    return m_positionReportRenderer->RenderOverlay(pmdc, vp, m_positionReportsHash);
+  }
+  else
+  {
+    return false;
+  }
 }
 
-void positionreport_pi::SetCursorLatLon(double lat, double lon) {
+void positionreport_pi::SetCursorLatLon(double lat, double lon)
+{
 }
 
-void positionreport_pi::FileSelected() {
-  m_pDialog->GetCurrentFileName();
+void positionreport_pi::FileSelected()
+{
+  if(m_positionReportsHash) delete m_positionReportsHash;
 
   PositionReportFileReader reader;
 
-  if(m_positionReportsHash) delete m_positionReportsHash;
-
   m_positionReportsHash = reader.Read(m_pDialog->GetCurrentFileName());
   m_pDialog->OnDataChanged();
+
+  RequestRefresh(m_parent_window);
 }
 
 bool positionreport_pi::LoadConfig(void)
 {
-  wxLogMessage(_T("LoadConfig"));
-      wxFileConfig *pConf = GetOCPNConfigObject();
+  wxFileConfig *pConf = GetOCPNConfigObject();
 
-      if(pConf)
-      {
-          wxLogMessage(_T("Config"));
+  if(!pConf) return false;
 
-            pConf->SetPath ( _T( "/Settings" ) );
+  pConf->SetPath ( _T( "/Settings" ) );
 
-            m_dialog_sx = pConf->Read ( _T ( "PositionReportDialogSizeX" ), 300L );
-            m_dialog_sy = pConf->Read ( _T ( "PositionReportDialogSizeY" ), 540L );
-            m_dialog_x =  pConf->Read ( _T ( "PositionReportDialogPosX" ), 20L );
-            m_dialog_y =  pConf->Read ( _T ( "PositionReportDialogPosY" ), 170L );
+  m_dialog_sx = pConf->Read ( _T ( "PositionReportDialogSizeX" ), 300L );
+  m_dialog_sy = pConf->Read ( _T ( "PositionReportDialogSizeY" ), 540L );
+  m_dialog_x =  pConf->Read ( _T ( "PositionReportDialogPosX" ), 20L );
+  m_dialog_y =  pConf->Read ( _T ( "PositionReportDialogPosY" ), 170L );
 
-            pConf->SetPath ( _T ( "/Directories" ) );
-            pConf->Read ( _T ( "PositionReportDirectory" ), &m_dir );
+  pConf->SetPath ( _T ( "/Directories" ) );
+  pConf->Read ( _T ( "PositionReportDirectory" ), &m_dir );
 
-            return true;
-      }
-      else
-            return false;
+  return true;
 }
 
 bool positionreport_pi::SaveConfig(void)
 {
-      wxFileConfig *pConf = GetOCPNConfigObject();
+  wxFileConfig *pConf = GetOCPNConfigObject();
 
-      if(pConf)
-      {
-            pConf->SetPath ( _T ( "/Settings" ) );
-            pConf->Write ( _T ( "PositionReportDialogSizeX" ),  m_dialog_sx );
-            pConf->Write ( _T ( "PositionReportDialogSizeY" ),  m_dialog_sy );
-            pConf->Write ( _T ( "PositionReportDialogPosX" ),   m_dialog_x );
-            pConf->Write ( _T ( "PositionReportDialogPosY" ),   m_dialog_y );
+  if(!pConf) return false;
 
-            pConf->SetPath ( _T ( "/Directories" ) );
-            pConf->Write ( _T ( "PositionReportDirectory" ), m_dir );
+  pConf->SetPath ( _T ( "/Settings" ) );
+  pConf->Write ( _T ( "PositionReportDialogSizeX" ),  m_dialog_sx );
+  pConf->Write ( _T ( "PositionReportDialogSizeY" ),  m_dialog_sy );
+  pConf->Write ( _T ( "PositionReportDialogPosX" ),   m_dialog_x );
+  pConf->Write ( _T ( "PositionReportDialogPosY" ),   m_dialog_y );
 
-            return true;
-      }
-      else
-            return false;
+  pConf->SetPath ( _T ( "/Directories" ) );
+  pConf->Write ( _T ( "PositionReportDirectory" ), m_dir );
+
+  return true;
 }

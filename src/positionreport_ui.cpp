@@ -45,8 +45,6 @@
 #include "positionreport_ui.h"
 
 
-WX_DEFINE_OBJARRAY ( DateTimeArray )
-
 IMPLEMENT_CLASS ( PositionReportUIDialog, wxDialog )
 
 BEGIN_EVENT_TABLE ( PositionReportUIDialog, wxDialog )
@@ -289,11 +287,13 @@ void PositionReportUIDialog::OnFileSelect(wxListEvent& event){
   pPlugIn->FileSelected();
 }
 
-void PositionReportUIDialog::OnDataChanged(void) {
+void PositionReportUIDialog::OnDataChanged(void)
+{
   updateTextPanel();
 }
 
-wxString PositionReportUIDialog::GetCurrentFileName(void) {
+wxString PositionReportUIDialog::GetCurrentFileName(void)
+{
   return m_currentFileName;
 }
 
@@ -319,4 +319,21 @@ void PositionReportUIDialog::updateTextPanel(void){
   
   // if the control is visible during the update it scrolls to the end of the text
   m_pTextCtrl->ShowPosition(0);
+}
+
+bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, PositionReportsHash *positionReports)
+{
+  wxLogMessage(_T("RenderOverlay"));
+
+  wxPoint point;
+  wxCoord radius(5);
+
+  for(PositionReportsHash::iterator it = positionReports->begin(); it != positionReports->end(); ++it)
+  {
+    GetCanvasPixLL(vp, &point, it->second->m_positionReport->m_latitude, it->second->m_positionReport->m_longitude);
+    pmdc->DrawCircle(point, radius);
+    pmdc->DrawText(it->second->m_callsign, point);
+  }
+
+  return true;
 }
