@@ -61,55 +61,65 @@ enum {
 
 class PositionReportUIDialog: public wxDialog
 {
-      DECLARE_CLASS(PositionReportUIDialog)
-                  DECLARE_EVENT_TABLE()
-      
-        public:
-            PositionReportUIDialog(void);
-            ~PositionReportUIDialog(void);
-            bool Create(wxWindow *parent, positionreport_pi *ppi, wxWindowID id = wxID_ANY,
-                        const wxString& caption = _("PositionReport Display Control"), const wxString initial_dir = wxT(""),
-                        const wxPoint& pos = wxDefaultPosition,
-                        const wxSize& size = wxDefaultSize,
-                        long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU);
-            void CreateControls();
-            void OnClose(wxCloseEvent& event);
-            void OnButtonCloseClick(wxCommandEvent& event);
-            void OnMove(wxMoveEvent& event);
-            void OnSize(wxSizeEvent& event);
-            void OnChooseDirClick(wxCommandEvent& event);
-            void OnFileSelect(wxListEvent& event);
-            void OnStationSelect(wxListEvent& event);
-          
-            void OnDataChanged(void);
-            
-            wxString GetCurrentFileName(void) { return m_currentFileName; }
-            wxString GetCurrentStationName(void) { return m_currentStationName; }
-    
-      private:
-            void Invalidate(void);
-            void updateFileList(void);
-            void updateStationList(void);
-            void updateRawPanel(wxString &awData);
-            void updateTextPanel(void);
-            
-      private:
-            wxWindow          *pParent;
-            positionreport_pi       *pPlugIn;
-            wxString           m_currentDir;
-            wxBitmap          *m_pfolder_bitmap;
-            wxArrayString      m_fileNameArray;
-            wxString           m_currentFileName;
-            wxArrayString      m_stationNameArray;
-            wxString           m_currentStationName;
-           
-            // the Contols that will get updated       
-            wxTextCtrl        *m_pitemCurrentDirectoryCtrl;
-            wxListCtrl        *m_pFileListCtrl;
-            wxListCtrl        *m_pStationListCtrl;
-            wxTextCtrl        *m_pTextCtrl;
-            wxTextCtrl        *m_pRawCtrl;
+  DECLARE_CLASS(PositionReportUIDialog)
+        DECLARE_EVENT_TABLE()
+
+  public:
+    PositionReportUIDialog(void);
+    ~PositionReportUIDialog(void);
+    bool Create(wxWindow *parent, positionreport_pi *ppi, wxWindowID id = wxID_ANY,
+                const wxString& caption = _("PositionReport Display Control"), const wxString initial_dir = wxT(""),
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU);
+    void CreateControls();
+    void OnClose(wxCloseEvent& event);
+    void OnButtonCloseClick(wxCommandEvent& event);
+    void OnMove(wxMoveEvent& event);
+    void OnSize(wxSizeEvent& event);
+    void OnChooseDirClick(wxCommandEvent& event);
+    void OnFileSelect(wxListEvent& event);
+    void OnStationSelect(wxListEvent& event);
+
+    void OnDataChanged(void);
+
+    wxString GetCurrentFileName(void) { return m_currentFileName; }
+    wxString GetCurrentStationName(void) { return m_currentStationName; }
+
+  private:
+    void Invalidate(void);
+    void updateFileList(void);
+    void updateStationList(void);
+    void updateRawPanel(wxString &awData);
+    void updateTextPanel(void);
+
+    private:
+    wxWindow          *pParent;
+    positionreport_pi       *pPlugIn;
+    wxString           m_currentDir;
+    wxBitmap          *m_pfolder_bitmap;
+    wxArrayString      m_fileNameArray;
+    wxString           m_currentFileName;
+    wxArrayString      m_stationNameArray;
+    wxString           m_currentStationName;
+
+    // the Contols that will get updated       
+    wxTextCtrl        *m_pitemCurrentDirectoryCtrl;
+    wxListCtrl        *m_pFileListCtrl;
+    wxListCtrl        *m_pStationListCtrl;
+    wxTextCtrl        *m_pTextCtrl;
+    wxTextCtrl        *m_pRawCtrl;
 };
+
+class StationList : wxListCtrl
+{
+  public:
+    wxString GetCurrentStationName(void) { return m_currentStationName; }
+
+ private:
+    wxArrayString      m_stationNameArray;
+    wxString           m_currentStationName;
+}
 
 class PositionReportRenderer
 {
