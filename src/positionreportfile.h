@@ -40,6 +40,7 @@
 #include <wx/dynarray.h>
 #include <wx/object.h>
 #include <wx/gdicmn.h>
+#include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
 
 #include "../../../include/ocpn_plugin.h"
 
@@ -69,13 +70,15 @@ public:
       wxString     m_comment;
 };
 
+WX_DEFINE_SORTED_ARRAY(PositionReport*, PositionReports);
+
 class Station {
 public:
       Station(void);
       ~Station();
 
       wxString        m_callsign;
-      PositionReport  *m_positionReport;
+      PositionReports *m_positionReports;
 
       bool m_isSelected;
 };

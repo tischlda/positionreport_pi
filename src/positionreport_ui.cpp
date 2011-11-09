@@ -265,9 +265,10 @@ void PositionReportUIDialog::updateStationList(void)
   StationHash *stationHash = m_plugin->GetStations();
   
   if(stationHash) {
-    for(StationHash::iterator it = stationHash->begin(); it != stationHash->end(); ++it) {
+    for(StationHash::iterator it = stationHash->begin(); it != stationHash->end(); ++it)
+    {
       station = it->second;
-      positionReport = station->m_positionReport;
+      positionReport = station->m_positionReports->Item(0);
 
       i = m_stationNameArray.Add(station->m_callsign);
 
@@ -327,12 +328,14 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
   wxPoint point;
   wxCoord radius(5);
   wxColour colour;
+  PositionReport *positionReport;
 
   if(stationHash)
   {
     for(StationHash::iterator it = stationHash->begin(); it != stationHash->end(); ++it)
     {
-      GetCanvasPixLL(vp, &point, it->second->m_positionReport->m_latitude, it->second->m_positionReport->m_longitude);
+      positionReport = it->second->m_positionReports->Item(0);
+      GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
 
       if(it->second->m_isSelected)
       {

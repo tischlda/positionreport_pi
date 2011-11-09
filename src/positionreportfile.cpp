@@ -35,7 +35,6 @@
 
 #include <wx/filename.h>
 #include <wx/txtstrm.h>
-#include <wx/arrimpl.cpp> // this is a magic incantation which must be done!
 
 #include <ctype.h>
 
@@ -43,17 +42,25 @@
 
 WX_DEFINE_OBJARRAY(GeoPoints);
 
+static int ComparePositionReports(PositionReport *p1, PositionReport *p2)
+{
+  return
+    p1->m_dateTime.IsEqualTo(p2->m_dateTime) ? 0 :
+    p1->m_dateTime.IsEarlierThan(p2->m_dateTime) ? -1 : 1;
+}
+
 PositionReport::PositionReport(void)
 {
 }
 
 Station::Station(void)
 {
+  m_positionReports = new PositionReports(ComparePositionReports);
 }
 
 Station::~Station()
 {
-  if(m_positionReport) delete m_positionReport;
+  if(m_positionReports) delete m_positionReports;
 }
 
 PositionReportFileReader::PositionReportFileReader(void)
@@ -120,8 +127,17 @@ StationHash* PositionReportFileReader::Read(wxInputStream &stream)
         dateTime.ParseDate(line.Mid(49, 16));
         comment = (line.Mid(66));
 
-        station = new Station();
-        station->m_callsign = callsign;
+        StationHash::iterator it = stationHash->find(callsign);
+
+        if(it != stationHash->end())
+        {
+          station = it->second;
+        }
+        else
+        {
+          station = new Station();
+          station->m_callsign = callsign;
+        }
 
         positionReport = new PositionReport();
         positionReport->m_distance = distance;
@@ -131,7 +147,7 @@ StationHash* PositionReportFileReader::Read(wxInputStream &stream)
         positionReport->m_latitude = lat;
         positionReport->m_longitude = lon;
 
-        station->m_positionReport = positionReport;
+        station->m_positionReports->Add(positionReport);
 
         stationHash->operator [](callsign) = station;
       }
