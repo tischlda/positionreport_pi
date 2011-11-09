@@ -66,7 +66,8 @@ PositionReportUIDialog::~PositionReportUIDialog(void)
 {
 
 }
-bool PositionReportUIDialog::Create (wxWindow *parent, positionreport_pi *ppi, wxWindowID id,
+
+bool PositionReportUIDialog::Create(wxWindow *parent, positionreport_pi *ppi, wxWindowID id,
                               const wxString& caption, const wxString initial_dir,
                               const wxPoint& pos, const wxSize& size, long style )
 {
@@ -110,7 +111,7 @@ bool PositionReportUIDialog::Create (wxWindow *parent, positionreport_pi *ppi, w
   return true;
 }
 
-void PositionReportUIDialog::OnClose ( wxCloseEvent& event )
+void PositionReportUIDialog::OnClose(wxCloseEvent& event)
 {
   m_plugin->SetDir(m_currentDir);
   RequestRefresh(m_parentWindow);
@@ -122,14 +123,13 @@ void PositionReportUIDialog::Invalidate(void)
 {
 }
 
-void PositionReportUIDialog::OnButtonCloseClick ( wxCommandEvent& event )
+void PositionReportUIDialog::OnButtonCloseClick(wxCommandEvent& event)
 {
   Close(); // this will call OnClose() later...
 }
 
-void PositionReportUIDialog::OnMove ( wxMoveEvent& event )
+void PositionReportUIDialog::OnMove(wxMoveEvent& event)
 {
-  //    Record the dialog position
   wxPoint p = event.GetPosition();
   m_plugin->SetDialogX(p.x);
   m_plugin->SetDialogY(p.y);
@@ -137,9 +137,8 @@ void PositionReportUIDialog::OnMove ( wxMoveEvent& event )
   event.Skip();
 }
 
-void PositionReportUIDialog::OnSize ( wxSizeEvent& event )
+void PositionReportUIDialog::OnSize(wxSizeEvent& event)
 {
-  //    Record the dialog size
   wxSize p = event.GetSize();
   m_plugin->SetDialogSizeX(p.x);
   m_plugin->SetDialogSizeY(p.y);
@@ -149,10 +148,10 @@ void PositionReportUIDialog::OnSize ( wxSizeEvent& event )
 
 
 
-void PositionReportUIDialog::OnChooseDirClick ( wxCommandEvent& event )
+void PositionReportUIDialog::OnChooseDirClick(wxCommandEvent& event)
 {
-  wxString new_dir  = ::wxDirSelector ( _( "Select PositionReport Directory" ), m_currentDir );
-  if( !new_dir.empty() )
+  wxString new_dir  = ::wxDirSelector(_T( "Select PositionReport Directory" ), m_currentDir);
+  if(!new_dir.empty())
   {
     m_currentDir = new_dir;
     m_pitemCurrentDirectoryCtrl->ChangeValue ( m_currentDir );
@@ -228,8 +227,8 @@ void PositionReportUIDialog::CreateControls()
   updateFileList();
 }
 
-//---------------------------------------------------------
-void PositionReportUIDialog::updateFileList(void){
+void PositionReportUIDialog::updateFileList(void)
+{
   wxDateTime access, mod, create;
 
   m_pFileListCtrl->DeleteAllItems();
@@ -253,7 +252,8 @@ void PositionReportUIDialog::updateFileList(void){
   m_currentFileName = wxEmptyString;
 }
 
-void PositionReportUIDialog::updateStationList(void){
+void PositionReportUIDialog::updateStationList(void)
+{
   int i;
   Station *station;
   PositionReport *positionReport;
