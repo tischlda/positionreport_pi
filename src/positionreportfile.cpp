@@ -43,15 +43,6 @@
 
 WX_DEFINE_OBJARRAY(GeoPoints);
 
-// Is the given point in the vp ??
-static bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y)
-{
-    if(  x >= (vp->lon_min) && x <= (vp->lon_max) &&
-            y >= (vp->lat_min) && y <= (vp->lat_max) )
-            return TRUE;
-    return FALSE;
-}
-
 PositionReport::PositionReport(void)
 {
 }
@@ -65,9 +56,6 @@ Station::~Station()
   if(m_positionReport) delete m_positionReport;
 }
 
-//---------------------------------------------
-// PositionReportFileReader implementation
-//---------------------------------------------
 PositionReportFileReader::PositionReportFileReader(void)
 {
 }
@@ -104,23 +92,28 @@ StationHash* PositionReportFileReader::Read(wxInputStream &stream)
   while(stream.IsOk() && !stream.Eof()) {
     line = text.ReadLine();
     
-    if(!headerRead) {
+    if(!headerRead)
+    {
       if(line.StartsWith(_T("CALL ")))
         headerRead = true;
     }
-    else if(headerRead) {
-      if(line.length() > 68) {
+    else if(headerRead)
+    {
+      if(line.length() > 68)
+      {
         callsign = line.Mid(0, 10);
         if(!line.Mid(10, 8).ToDouble(&distance)) distance = -1;
         if(!line.Mid(21, 3).ToDouble(&bearing)) bearing = -1;
 
         if(line.Mid(27, 2).ToDouble(&latDeg) &&
-           line.Mid(30, 5).ToDouble(&latMin)) {
+           line.Mid(30, 5).ToDouble(&latMin))
+        {
              lat = (latDeg + (latMin / 60)) * (line.Mid(35, 1) == _T("N") ? 1 : -1);
         }
 
         if(line.Mid(37, 3).ToDouble(&lonDeg) &&
-           line.Mid(41, 5).ToDouble(&lonMin)) {
+           line.Mid(41, 5).ToDouble(&lonMin))
+        {
              lon = (lonDeg + (lonMin / 60)) * (line.Mid(46, 1) == _T("E")  ? 1 : -1);
         }
 
