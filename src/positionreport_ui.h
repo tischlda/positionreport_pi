@@ -94,10 +94,10 @@ class PositionReportUIDialog: public wxDialog
     void updateTextPanel(void);
 
     private:
-    wxWindow          *pParent;
-    positionreport_pi       *pPlugIn;
+    wxWindow          *m_parentWindow;
+    positionreport_pi *m_plugin;
     wxString           m_currentDir;
-    wxBitmap          *m_pfolder_bitmap;
+    wxBitmap          *m_folderBitmap;
     wxArrayString      m_fileNameArray;
     wxString           m_currentFileName;
     wxArrayString      m_stationNameArray;

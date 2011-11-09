@@ -70,8 +70,8 @@ bool PositionReportUIDialog::Create (wxWindow *parent, positionreport_pi *ppi, w
                               const wxString& caption, const wxString initial_dir,
                               const wxPoint& pos, const wxSize& size, long style )
 {
-  pParent = parent;
-  pPlugIn = ppi;
+  m_parentWindow = parent;
+  m_plugin = ppi;
 
   m_currentDir = initial_dir;
 
@@ -97,7 +97,7 @@ bool PositionReportUIDialog::Create (wxWindow *parent, positionreport_pi *ppi, w
 
   //      SetForegroundColour ( pFontMgr->GetFontColor ( _T ( "GRIBUIDialog" ) ) );
 
-  m_pfolder_bitmap = new wxBitmap ( folder );   // comes from XPM include
+  m_folderBitmap = new wxBitmap ( folder );   // comes from XPM include
 
   CreateControls();
 
@@ -112,10 +112,10 @@ bool PositionReportUIDialog::Create (wxWindow *parent, positionreport_pi *ppi, w
 
 void PositionReportUIDialog::OnClose ( wxCloseEvent& event )
 {
-  pPlugIn->SetDir(m_currentDir);
-  RequestRefresh(pParent);
+  m_plugin->SetDir(m_currentDir);
+  RequestRefresh(m_parentWindow);
   Destroy();
-  pPlugIn->OnDialogClose();
+  m_plugin->OnDialogClose();
 }
 
 void PositionReportUIDialog::Invalidate(void)
@@ -131,8 +131,8 @@ void PositionReportUIDialog::OnMove ( wxMoveEvent& event )
 {
   //    Record the dialog position
   wxPoint p = event.GetPosition();
-  pPlugIn->SetDialogX(p.x);
-  pPlugIn->SetDialogY(p.y);
+  m_plugin->SetDialogX(p.x);
+  m_plugin->SetDialogY(p.y);
 
   event.Skip();
 }
@@ -141,8 +141,8 @@ void PositionReportUIDialog::OnSize ( wxSizeEvent& event )
 {
   //    Record the dialog size
   wxSize p = event.GetSize();
-  pPlugIn->SetDialogSizeX(p.x);
-  pPlugIn->SetDialogSizeY(p.y);
+  m_plugin->SetDialogSizeX(p.x);
+  m_plugin->SetDialogSizeY(p.y);
 
   event.Skip();
 }
@@ -161,7 +161,7 @@ void PositionReportUIDialog::OnChooseDirClick ( wxCommandEvent& event )
 
     Refresh();
 
-    pPlugIn->SetDir(m_currentDir);
+    m_plugin->SetDir(m_currentDir);
   }
 }
 
@@ -186,7 +186,7 @@ void PositionReportUIDialog::CreateControls()
 
   m_pitemCurrentDirectoryCtrl->AppendText(m_currentDir);
 
-  wxButton* bChooseDir = new wxBitmapButton(this, ID_CHOOSEPOSITIONREPORTDIR, *m_pfolder_bitmap);
+  wxButton* bChooseDir = new wxBitmapButton(this, ID_CHOOSEPOSITIONREPORTDIR, *m_folderBitmap);
   itemStaticBoxSizer11->Add(bChooseDir, 0, wxALIGN_RIGHT|wxALL, 5);
 
   // file panel
@@ -262,7 +262,7 @@ void PositionReportUIDialog::updateStationList(void){
 
   m_stationNameArray.Empty();
 
-  StationHash *stationHash = pPlugIn->GetStation();
+  StationHash *stationHash = m_plugin->GetStations();
   
   if(stationHash) {
     for(StationHash::iterator it = stationHash->begin(); it != stationHash->end(); ++it) {
@@ -297,7 +297,7 @@ void PositionReportUIDialog::OnFileSelect(wxListEvent& event)
     m_currentFileName = wxEmptyString;
   }
 
-  pPlugIn->FileSelected();
+  m_plugin->FileSelected();
 }
 
 void PositionReportUIDialog::OnStationSelect(wxListEvent& event)
@@ -313,7 +313,7 @@ void PositionReportUIDialog::OnStationSelect(wxListEvent& event)
     m_currentStationName = wxEmptyString;
   }
 
-  pPlugIn->StationSelected();
+  m_plugin->StationSelected();
 }
 
 void PositionReportUIDialog::OnDataChanged(void)

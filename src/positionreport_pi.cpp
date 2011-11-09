@@ -59,7 +59,7 @@ positionreport_pi::positionreport_pi(void *ppimgr)
 {
   initialize_images();
 
-  m_pDialog = NULL;
+  m_dialog = NULL;
   m_stationHash = NULL;
   m_positionReportRenderer = NULL;
 }
@@ -76,7 +76,7 @@ int positionreport_pi::Init(void)
 
   LoadConfig();
 
-  m_parent_window = GetOCPNCanvasWindow();
+  m_parentWindow = GetOCPNCanvasWindow();
 
   m_leftclick_tool_id  = InsertPlugInTool(
     _T(""), _img_positionreport_pi, _img_positionreport_pi, wxITEM_NORMAL,
@@ -95,7 +95,7 @@ int positionreport_pi::Init(void)
 
 bool positionreport_pi::DeInit(void)
 {
-  if(m_pDialog) m_pDialog->Close();
+  if(m_dialog) m_dialog->Close();
   if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
   if(m_positionReportRenderer) { delete m_positionReportRenderer; m_positionReportRenderer = NULL; }
 
@@ -155,21 +155,21 @@ void positionreport_pi::ShowPreferencesDialog(wxWindow* parent)
 
 void positionreport_pi::OnToolbarToolCallback(int id)
 {
-  if(!m_pDialog)
+  if(!m_dialog)
   {
-    m_pDialog = new PositionReportUIDialog();
-    m_pDialog->Create(m_parent_window, this, -1, 
+    m_dialog = new PositionReportUIDialog();
+    m_dialog->Create(m_parentWindow, this, -1, 
       _("PositionReport Display Control"), m_dir,
       wxPoint(m_dialog_x, m_dialog_y), 
       wxSize(m_dialog_sx, m_dialog_sy));
   }
 
-  m_pDialog->Show();
+  m_dialog->Show();
 }
 
 void positionreport_pi::OnDialogClose()
 {
-  m_pDialog = NULL;
+  m_dialog = NULL;
   if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
   SaveConfig();
 }
@@ -196,10 +196,10 @@ void positionreport_pi::FileSelected()
 
   PositionReportFileReader reader;
 
-  m_stationHash = reader.Read(m_pDialog->GetCurrentFileName());
-  m_pDialog->OnDataChanged();
+  m_stationHash = reader.Read(m_dialog->GetCurrentFileName());
+  m_dialog->OnDataChanged();
 
-  RequestRefresh(m_parent_window);
+  RequestRefresh(m_parentWindow);
 }
 
 void positionreport_pi::StationSelected()
@@ -209,14 +209,14 @@ void positionreport_pi::StationSelected()
     it->second->m_isSelected = false;
   }
 
-  StationHash::iterator it = m_stationHash->find(m_pDialog->GetCurrentStationName());
+  StationHash::iterator it = m_stationHash->find(m_dialog->GetCurrentStationName());
 
   if(it != m_stationHash->end())
   {
     it->second->m_isSelected = true;
   }
 
-  RequestRefresh(m_parent_window);
+  RequestRefresh(m_parentWindow);
 }
 
 bool positionreport_pi::LoadConfig(void)
