@@ -204,16 +204,16 @@ void positionreport_pi::FileSelected()
 
 void positionreport_pi::StationSelected()
 {
-  for(Stations::iterator it = m_stations->begin(); it != m_stations->end(); ++it)
+  for(size_t i = 0; i < m_stations->Count(); i++)
   {
-    it->second->m_isSelected = false;
+    m_stations->Item(i)->m_isSelected = false;
   }
 
-  Stations::iterator it = m_stations->find(m_dialog->GetCurrentStationName());
+  Station *currentStation = m_stations->Find(m_dialog->GetCurrentStationName());
 
-  if(it != m_stations->end())
+  if(currentStation)
   {
-    it->second->m_isSelected = true;
+    currentStation->m_isSelected = true;
   }
 
   RequestRefresh(m_parentWindow);

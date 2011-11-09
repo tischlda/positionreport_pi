@@ -266,7 +266,6 @@ void PositionReportUIDialog::updateFileList(void)
 
 void PositionReportUIDialog::updateStationList(void)
 {
-  int i;
   Station *station;
   PositionReport *positionReport;
   
@@ -276,10 +275,11 @@ void PositionReportUIDialog::updateStationList(void)
 
   Stations *stations = m_plugin->GetStations();
   
-  if(stations) {
-    for(Stations::iterator it = stations->begin(); it != stations->end(); ++it)
+  if(stations)
+  {
+    for(size_t i = 0; i < stations->Count(); i++)
     {
-      station = it->second;
+      station = stations->Item(i);
       positionReport = station->m_positionReports->Item(0);
 
       i = m_stationNameArray.Add(station->m_callsign);
@@ -341,15 +341,18 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
   wxCoord radius(5);
   wxColour colour;
   PositionReport *positionReport;
+  Station *station;
 
   if(stations)
   {
-    for(Stations::iterator it = stations->begin(); it != stations->end(); ++it)
+    for(size_t i = 0; i < stations->Count(); i++)
     {
-      positionReport = it->second->m_positionReports->Item(0);
+      station = stations->Item(i);
+
+      positionReport = station->m_positionReports->Item(0);
       GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
 
-      if(it->second->m_isSelected)
+      if(station->m_isSelected)
       {
         GetGlobalColor(_T("RED1"), &colour);
       }
@@ -374,7 +377,7 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
       wxFont *font1 = wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxNORMAL, wxFONTWEIGHT_NORMAL,
                         FALSE, wxString (_T("Arial"))); 
       pmdc->SetFont(*font1);
-      pmdc->DrawText(it->second->m_callsign, point);
+      pmdc->DrawText(station->m_callsign, point);
 
       pmdc->SetFont(sfont);
 

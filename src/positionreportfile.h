@@ -46,57 +46,64 @@
 
 class FileDescription
 {
-public:
-  FileDescription(wxString& name, wxDateTime& date) { m_name = name; m_date = date; }
+  public:
+    FileDescription(wxString& name, wxDateTime& date) { m_name = name; m_date = date; }
 
-  wxString   m_name;
-  wxDateTime m_date;
+    wxString   m_name;
+    wxDateTime m_date;
 };
 
 WX_DEFINE_SORTED_ARRAY(FileDescription*, FileDescriptionArray);
 
-class GeoPoint : public wxRealPoint{
-public:
-      static const double INVALID_KOORD;
-      GeoPoint(double lon = INVALID_KOORD, double lat = INVALID_KOORD) { Set(lon, lat); }
-      GeoPoint(wxString &token) { Set(token); }
-      void Set(wxString &token);
-      void Set(double lon = INVALID_KOORD, double lat = INVALID_KOORD) { x = lon; y = lat; }
-      wxString ToString(void);
-};
+class PositionReport
+{
+  public:
+    PositionReport(void);
 
-WX_DECLARE_OBJARRAY(GeoPoint, GeoPoints);
-
-class PositionReport {
-public:
-      PositionReport(void);
-      
-      wxDateTime   m_dateTime;
-      double       m_latitude;
-      double       m_longitude;
-      double       m_distance; // in nautical miles
-      double       m_bearing; // in deg
-      unsigned int m_course; // in deg
-      unsigned int m_speed;  // in knots, 99=unknown
-      wxString     m_comment;
+    wxDateTime   m_dateTime;
+    double       m_latitude;
+    double       m_longitude;
+    double       m_distance; // in nautical miles
+    double       m_bearing; // in deg
+    unsigned int m_course; // in deg
+    unsigned int m_speed;  // in knots, 99=unknown
+    wxString     m_comment;
 };
 
 WX_DEFINE_SORTED_ARRAY(PositionReport*, PositionReports);
 
-class Station {
-public:
-      Station(void);
-      ~Station();
+class Station
+{
+  public:
+    Station(void);
+    ~Station(void);
 
-      wxString        m_callsign;
-      PositionReports *m_positionReports;
+    wxString        m_callsign;
+    PositionReports *m_positionReports;
 
-      bool m_isSelected;
+    bool m_isSelected;
 };
 
-WX_DECLARE_STRING_HASH_MAP(Station*, Stations);
+WX_DEFINE_SORTED_ARRAY(Station*, StationArray);
 
-class PositionReportFileReader {
+class Stations
+{
+  public:
+    Stations(void);
+    ~Stations(void);
+
+    void Add(Station* station);
+    Station* Find(wxString& callsign);
+
+    Station* Item(size_t uiIndex) { return m_stationArray->Item(uiIndex); }
+    size_t Count(void) { return m_stationArray->Count(); }
+
+  private:
+    StationArray* m_stationArray;
+};
+
+class PositionReportFileReader
+{
 public:
       PositionReportFileReader(void);
       

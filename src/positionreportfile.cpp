@@ -40,8 +40,6 @@
 
 #include "PositionReportFile.h"
 
-WX_DEFINE_OBJARRAY(GeoPoints);
-
 static int ComparePositionReports(PositionReport *p1, PositionReport *p2)
 {
   return
@@ -66,6 +64,42 @@ Station::~Station()
     delete m_positionReports->Item(i);
   }
   delete m_positionReports;
+}
+
+static int CompareStations(Station *s1, Station *s2)
+{
+  return s1->m_callsign < s2->m_callsign ? -1 : 1;
+}
+
+Stations::Stations(void)
+{
+  m_stationArray = new StationArray(CompareStations);
+}
+
+Stations::~Stations(void)
+{
+  for(size_t i = 0; i < m_stationArray->Count(); i++)
+  {
+    delete m_stationArray->Item(i);
+  }
+  delete m_stationArray;
+}
+
+void Stations::Add(Station* station)
+{
+  m_stationArray->Add(station);
+}
+
+Station* Stations::Find(wxString& callsign)
+{
+  for(size_t i = 0; i < m_stationArray->Count(); i++)
+  {
+    if(m_stationArray->Item(i)->m_callsign == callsign)
+    {
+      return m_stationArray->Item(i);
+    }
+  }
+  return NULL;
 }
 
 PositionReportFileReader::PositionReportFileReader(void)
@@ -132,16 +166,12 @@ Stations* PositionReportFileReader::Read(wxInputStream &stream)
         dateTime.ParseDate(line.Mid(49, 16));
         comment = (line.Mid(66));
 
-        Stations::iterator it = stations->find(callsign);
-
-        if(it != stations->end())
-        {
-          station = it->second;
-        }
-        else
+        station = stations->Find(callsign);
+        if(!station)
         {
           station = new Station();
           station->m_callsign = callsign;
+          stations->Add(station);
         }
 
         positionReport = new PositionReport();
@@ -153,8 +183,6 @@ Stations* PositionReportFileReader::Read(wxInputStream &stream)
         positionReport->m_longitude = lon;
 
         station->m_positionReports->Add(positionReport);
-
-        stations->operator [](callsign) = station;
       }
     }
   }
