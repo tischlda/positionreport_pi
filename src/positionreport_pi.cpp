@@ -57,20 +57,26 @@ extern "C" DECL_EXP void destroy_pi(opencpn_plugin* p)
 positionreport_pi::positionreport_pi(void *ppimgr)
       :opencpn_plugin(ppimgr)
 {
+  initialize_images();
+
+  m_pDialog = NULL;
+  m_stationHash = NULL;
+  m_positionReportRenderer = NULL;
+}
+
+int positionreport_pi::Init(void)
+{
+  AddLocaleCatalog( _T("opencpn-positionreport_pi") );
+
   m_dialog_x = 0;
   m_dialog_y = 0;
   m_dialog_sx = 200;
   m_dialog_sy = 200;
   m_dir = wxT("");
-  m_pDialog = NULL;
+
+  LoadConfig();
 
   m_parent_window = GetOCPNCanvasWindow();
-
-  initialize_images();
-
-  // TODO: init images
-  // _img_pi = new wxBitmap(20, 20,-1);
-
 
   m_leftclick_tool_id  = InsertPlugInTool(
     _T(""), _img_positionreport_pi, _img_positionreport_pi, wxITEM_NORMAL,
@@ -78,14 +84,6 @@ positionreport_pi::positionreport_pi(void *ppimgr)
     POSITIONREPORT_TOOL_POSITION, 0, this);
 
   m_positionReportRenderer = new PositionReportRenderer();
-  m_stationHash = NULL;
-}
-
-int positionreport_pi::Init(void)
-{
-  AddLocaleCatalog( _T("opencpn-positionreport_pi") );
-
-  LoadConfig();
 
   return (
     WANTS_OVERLAY_CALLBACK  |
@@ -98,7 +96,8 @@ int positionreport_pi::Init(void)
 bool positionreport_pi::DeInit(void)
 {
   if(m_pDialog) m_pDialog->Close();
-  if(m_stationHash) delete m_stationHash;
+  if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
+  if(m_positionReportRenderer) { delete m_positionReportRenderer; m_positionReportRenderer = NULL; }
 
   return true;
 }
@@ -156,17 +155,13 @@ void positionreport_pi::ShowPreferencesDialog(wxWindow* parent)
 
 void positionreport_pi::OnToolbarToolCallback(int id)
 {
-  if(NULL == m_pDialog)
+  if(!m_pDialog)
   {
     m_pDialog = new PositionReportUIDialog();
-    m_pDialog->Create (
-      m_parent_window, 
-      this, 
-      -1, 
-      _("PositionReport Display Control"), 
-      m_dir,
-      wxPoint( m_dialog_x, m_dialog_y), 
-      wxSize( m_dialog_sx, m_dialog_sy));
+    m_pDialog->Create(m_parent_window, this, -1, 
+      _("PositionReport Display Control"), m_dir,
+      wxPoint(m_dialog_x, m_dialog_y), 
+      wxSize(m_dialog_sx, m_dialog_sy));
   }
 
   m_pDialog->Show();
@@ -175,6 +170,7 @@ void positionreport_pi::OnToolbarToolCallback(int id)
 void positionreport_pi::OnDialogClose()
 {
   m_pDialog = NULL;
+  if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
   SaveConfig();
 }
 
@@ -196,7 +192,7 @@ void positionreport_pi::SetCursorLatLon(double lat, double lon)
 
 void positionreport_pi::FileSelected()
 {
-  if(m_stationHash) delete m_stationHash;
+  if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
 
   PositionReportFileReader reader;
 

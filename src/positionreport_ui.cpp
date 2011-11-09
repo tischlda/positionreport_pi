@@ -217,8 +217,6 @@ void PositionReportUIDialog::CreateControls()
   m_pStationListCtrl->InsertColumn(4, _T("Comment"));
   spsizer->Add(m_pStationListCtrl, 1, wxGROW);
 
-  m_pStationListCtrl->
-
   // A horizontal box sizer to contain OK
   wxBoxSizer* ackBox = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(ackBox, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);

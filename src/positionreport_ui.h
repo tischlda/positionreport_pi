@@ -119,7 +119,7 @@ class StationList : wxListCtrl
  private:
     wxArrayString      m_stationNameArray;
     wxString           m_currentStationName;
-}
+};
 
 class PositionReportRenderer
 {
