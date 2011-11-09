@@ -60,7 +60,11 @@ Station::Station(void)
 
 Station::~Station()
 {
-  if(m_positionReports) delete m_positionReports;
+  for(size_t i = 0; i < m_positionReports->Count(); i++)
+  {
+    delete m_positionReports->Item(i);
+  }
+  delete m_positionReports;
 }
 
 PositionReportFileReader::PositionReportFileReader(void)
@@ -155,4 +159,4 @@ StationHash* PositionReportFileReader::Read(wxInputStream &stream)
   }
 
   return stationHash;
-}
+};

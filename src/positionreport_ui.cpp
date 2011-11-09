@@ -57,14 +57,22 @@ BEGIN_EVENT_TABLE( PositionReportUIDialog, wxDialog)
   EVT_LIST_ITEM_SELECTED (ID_STATIONLIST, PositionReportUIDialog::OnStationSelect)
 END_EVENT_TABLE()
 
+static int SortFiles(FileDescription *fd1, FileDescription *fd2)
+{
+  return
+    fd1->m_date.IsEqualTo(fd2->m_date) ? 0 :
+    fd1->m_date.IsLaterThan(fd2->m_date) ? -1 : 1;
+}
+
 PositionReportUIDialog::PositionReportUIDialog(void)
 {
   Init();
+  m_fileDescriptions = new FileDescriptionArray(SortFiles);
 }
 
 PositionReportUIDialog::~PositionReportUIDialog(void)
 {
-
+  delete m_fileDescriptions;
 }
 
 bool PositionReportUIDialog::Create(wxWindow *parent, positionreport_pi *ppi, wxWindowID id,
@@ -233,20 +241,24 @@ void PositionReportUIDialog::updateFileList(void)
 
   m_pFileListCtrl->DeleteAllItems();
 
-  m_fileNameArray.Empty();
+  m_fileDescriptions->Clear();
 
-  size_t res = wxDir::GetAllFiles(m_currentDir, &m_fileNameArray, wxEmptyString, wxDIR_FILES);
+  wxArrayString fileNames;
 
-  for(unsigned int i = 0; i < m_fileNameArray.GetCount(); i++)
+  size_t res = wxDir::GetAllFiles(m_currentDir, &fileNames, wxEmptyString, wxDIR_FILES);
+
+  for(size_t i = 0; i < fileNames.GetCount(); i++)
   {
-    // remove dirname from file
-    wxFileName file(m_fileNameArray[i]);
-    m_fileNameArray[i] = file.GetFullName();
+    wxFileName file(fileNames[i]);
     file.GetTimes(&access, &mod, &create);
+    m_fileDescriptions->Add(new FileDescription(file.GetFullName(), create));
+  }
 
-    m_pFileListCtrl->InsertItem(i, file.GetFullName());
+  for(size_t i = 0; i < m_fileDescriptions->GetCount(); i++)
+  {
+    m_pFileListCtrl->InsertItem(i, m_fileDescriptions->Item(i)->m_name);
     m_pFileListCtrl->SetItemData(i, i);
-    m_pFileListCtrl->SetItem(i, 1, create.FormatDate());
+    m_pFileListCtrl->SetItem(i, 1, m_fileDescriptions->Item(i)->m_date.FormatDate());
   }
   
   m_currentFileName = wxEmptyString;
@@ -290,7 +302,7 @@ void PositionReportUIDialog::OnFileSelect(wxListEvent& event)
   
   if(selectedItemIndex != -1)
   {
-    wxFileName fn(m_currentDir, m_fileNameArray[m_pFileListCtrl->GetItemData(selectedItemIndex)]);
+    wxFileName fn(m_currentDir, m_fileDescriptions->Item(m_pFileListCtrl->GetItemData(selectedItemIndex))->m_name);
     m_currentFileName = fn.GetFullPath();
   }
   else

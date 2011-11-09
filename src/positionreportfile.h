@@ -44,6 +44,17 @@
 
 #include "../../../include/ocpn_plugin.h"
 
+class FileDescription
+{
+public:
+  FileDescription(wxString& name, wxDateTime& date) { m_name = name; m_date = date; }
+
+  wxString   m_name;
+  wxDateTime m_date;
+};
+
+WX_DEFINE_SORTED_ARRAY(FileDescription*, FileDescriptionArray);
+
 class GeoPoint : public wxRealPoint{
 public:
       static const double INVALID_KOORD;

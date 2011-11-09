@@ -98,7 +98,7 @@ class PositionReportUIDialog: public wxDialog
     positionreport_pi *m_plugin;
     wxString           m_currentDir;
     wxBitmap          *m_folderBitmap;
-    wxArrayString      m_fileNameArray;
+    FileDescriptionArray *m_fileDescriptions;
     wxString           m_currentFileName;
     wxArrayString      m_stationNameArray;
     wxString           m_currentStationName;
