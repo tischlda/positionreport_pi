@@ -82,7 +82,7 @@ class positionreport_pi : public opencpn_plugin
     void SetDir(wxString dir){ m_dir = dir; }
     void FileSelected(void);
     void StationSelected(void);
-    StationHash* GetStations(void) { return m_stationHash; }
+    Stations* GetStations(void) { return m_stations; }
 
   private:
     bool LoadConfig(void);
@@ -100,7 +100,7 @@ class positionreport_pi : public opencpn_plugin
     PositionReportUIDialog *m_dialog;
     PositionReportRenderer *m_positionReportRenderer;
     
-    StationHash  *m_stationHash;
+    Stations  *m_stations;
 };
 
 #endif

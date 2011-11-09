@@ -56,6 +56,7 @@ PositionReport::PositionReport(void)
 Station::Station(void)
 {
   m_positionReports = new PositionReports(ComparePositionReports);
+  m_isSelected = false;
 }
 
 Station::~Station()
@@ -71,7 +72,7 @@ PositionReportFileReader::PositionReportFileReader(void)
 {
 }
 
-StationHash* PositionReportFileReader::Read(wxString& filename)
+Stations* PositionReportFileReader::Read(wxString& filename)
 {
   wxFileName file(filename);
   
@@ -83,7 +84,7 @@ StationHash* PositionReportFileReader::Read(wxString& filename)
   }
 }
 
-StationHash* PositionReportFileReader::Read(wxInputStream &stream)
+Stations* PositionReportFileReader::Read(wxInputStream &stream)
 {
   wxString line;
   wxString callsign;
@@ -91,11 +92,11 @@ StationHash* PositionReportFileReader::Read(wxInputStream &stream)
   double latDeg, latMin, lat, lonDeg, lonMin, lon;
   wxDateTime dateTime;
   wxString comment;
-  StationHash *stationHash;
+  Stations *stations;
   Station *station;
   PositionReport *positionReport;
 
-  stationHash = new StationHash();
+  stations = new Stations();
   bool headerRead = false;
 
   wxTextInputStream text(stream);
@@ -131,9 +132,9 @@ StationHash* PositionReportFileReader::Read(wxInputStream &stream)
         dateTime.ParseDate(line.Mid(49, 16));
         comment = (line.Mid(66));
 
-        StationHash::iterator it = stationHash->find(callsign);
+        Stations::iterator it = stations->find(callsign);
 
-        if(it != stationHash->end())
+        if(it != stations->end())
         {
           station = it->second;
         }
@@ -153,10 +154,10 @@ StationHash* PositionReportFileReader::Read(wxInputStream &stream)
 
         station->m_positionReports->Add(positionReport);
 
-        stationHash->operator [](callsign) = station;
+        stations->operator [](callsign) = station;
       }
     }
   }
 
-  return stationHash;
+  return stations;
 };

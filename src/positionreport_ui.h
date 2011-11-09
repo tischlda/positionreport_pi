@@ -124,7 +124,7 @@ class StationList : wxListCtrl
 class PositionReportRenderer
 {
   public:
-    bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, StationHash *stationHash);
+    bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations);
 };
 
 #endif

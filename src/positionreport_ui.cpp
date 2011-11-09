@@ -274,10 +274,10 @@ void PositionReportUIDialog::updateStationList(void)
 
   m_stationNameArray.Empty();
 
-  StationHash *stationHash = m_plugin->GetStations();
+  Stations *stations = m_plugin->GetStations();
   
-  if(stationHash) {
-    for(StationHash::iterator it = stationHash->begin(); it != stationHash->end(); ++it)
+  if(stations) {
+    for(Stations::iterator it = stations->begin(); it != stations->end(); ++it)
     {
       station = it->second;
       positionReport = station->m_positionReports->Item(0);
@@ -334,7 +334,7 @@ void PositionReportUIDialog::OnDataChanged(void)
   updateStationList();
 }
 
-bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, StationHash *stationHash)
+bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations)
 {
   bool hasDrawn = false;
   wxPoint point;
@@ -342,9 +342,9 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
   wxColour colour;
   PositionReport *positionReport;
 
-  if(stationHash)
+  if(stations)
   {
-    for(StationHash::iterator it = stationHash->begin(); it != stationHash->end(); ++it)
+    for(Stations::iterator it = stations->begin(); it != stations->end(); ++it)
     {
       positionReport = it->second->m_positionReports->Item(0);
       GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
@@ -361,8 +361,22 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
       wxPen pen(colour, 2, wxSOLID);
       pmdc->SetPen(pen);
 
+      wxBrush brush(colour, wxSOLID);
+      pmdc->SetBackground(brush);
+      pmdc->SetBrush(brush);
+
       pmdc->DrawCircle(point, radius);
+
+      GetGlobalColor(_T("UBLCK"), &colour);
+      pmdc->SetTextForeground( colour );
+      wxFont sfont = pmdc->GetFont();
+
+      wxFont *font1 = wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxNORMAL, wxFONTWEIGHT_NORMAL,
+                        FALSE, wxString (_T("Arial"))); 
+      pmdc->SetFont(*font1);
       pmdc->DrawText(it->second->m_callsign, point);
+
+      pmdc->SetFont(sfont);
 
       hasDrawn = true;
     }

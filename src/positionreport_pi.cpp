@@ -60,7 +60,7 @@ positionreport_pi::positionreport_pi(void *ppimgr)
   initialize_images();
 
   m_dialog = NULL;
-  m_stationHash = NULL;
+  m_stations = NULL;
   m_positionReportRenderer = NULL;
 }
 
@@ -96,7 +96,7 @@ int positionreport_pi::Init(void)
 bool positionreport_pi::DeInit(void)
 {
   if(m_dialog) m_dialog->Close();
-  if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
+  if(m_stations) { delete m_stations; m_stations = NULL; }
   if(m_positionReportRenderer) { delete m_positionReportRenderer; m_positionReportRenderer = NULL; }
 
   return true;
@@ -170,15 +170,15 @@ void positionreport_pi::OnToolbarToolCallback(int id)
 void positionreport_pi::OnDialogClose()
 {
   m_dialog = NULL;
-  if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
+  if(m_stations) { delete m_stations; m_stations = NULL; }
   SaveConfig();
 }
 
 bool positionreport_pi::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp)
 {
-  if(m_stationHash)
+  if(m_stations)
   {
-    return m_positionReportRenderer->RenderOverlay(pmdc, vp, m_stationHash);
+    return m_positionReportRenderer->RenderOverlay(pmdc, vp, m_stations);
   }
   else
   {
@@ -192,11 +192,11 @@ void positionreport_pi::SetCursorLatLon(double lat, double lon)
 
 void positionreport_pi::FileSelected()
 {
-  if(m_stationHash) { delete m_stationHash; m_stationHash = NULL; }
+  if(m_stations) { delete m_stations; m_stations = NULL; }
 
   PositionReportFileReader reader;
 
-  m_stationHash = reader.Read(m_dialog->GetCurrentFileName());
+  m_stations = reader.Read(m_dialog->GetCurrentFileName());
   m_dialog->OnDataChanged();
 
   RequestRefresh(m_parentWindow);
@@ -204,14 +204,14 @@ void positionreport_pi::FileSelected()
 
 void positionreport_pi::StationSelected()
 {
-  for(StationHash::iterator it = m_stationHash->begin(); it != m_stationHash->end(); ++it)
+  for(Stations::iterator it = m_stations->begin(); it != m_stations->end(); ++it)
   {
     it->second->m_isSelected = false;
   }
 
-  StationHash::iterator it = m_stationHash->find(m_dialog->GetCurrentStationName());
+  Stations::iterator it = m_stations->find(m_dialog->GetCurrentStationName());
 
-  if(it != m_stationHash->end())
+  if(it != m_stations->end())
   {
     it->second->m_isSelected = true;
   }

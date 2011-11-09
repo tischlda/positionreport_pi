@@ -94,14 +94,14 @@ public:
       bool m_isSelected;
 };
 
-WX_DECLARE_STRING_HASH_MAP(Station*, StationHash);
+WX_DECLARE_STRING_HASH_MAP(Station*, Stations);
 
 class PositionReportFileReader {
 public:
       PositionReportFileReader(void);
       
-      StationHash* Read(wxString& filename);
-      StationHash* Read(wxInputStream &stream);
+      Stations* Read(wxString& filename);
+      Stations* Read(wxInputStream &stream);
 
       static const size_t MaxFileSize = 10000;
 };
