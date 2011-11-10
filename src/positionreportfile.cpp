@@ -56,17 +56,32 @@ PositionReport::PositionReport(void)
   m_isSelected = false;
 }
 
+PositionReports::PositionReports(void)
+{
+  m_positionReportArray = new PositionReportArray(ComparePositionReports);
+}
+
+PositionReports::~PositionReports(void)
+{
+  for(size_t i = 0; i < m_positionReportArray->Count(); i++)
+  {
+    delete m_positionReportArray->Item(i);
+  }
+  delete m_positionReportArray;
+}
+
+void PositionReports::Add(PositionReport* positionReport)
+{
+  m_positionReportArray->Add(positionReport);
+}
+
 Station::Station(void)
 {
-  m_positionReports = new PositionReports(ComparePositionReports);
+  m_positionReports = new PositionReports();
 }
 
 Station::~Station()
 {
-  for(size_t i = 0; i < m_positionReports->Count(); i++)
-  {
-    delete m_positionReports->Item(i);
-  }
   delete m_positionReports;
 }
 

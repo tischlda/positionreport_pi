@@ -72,7 +72,22 @@ class PositionReport
     bool         m_isSelected;
 };
 
-WX_DEFINE_SORTED_ARRAY(PositionReport*, PositionReports);
+WX_DEFINE_SORTED_ARRAY(PositionReport*, PositionReportArray);
+
+class PositionReports
+{
+public:
+  PositionReports(void);
+  ~PositionReports(void);
+
+  void Add(PositionReport* positionReport);
+
+  PositionReport* Item(size_t uiIndex) { return m_positionReportArray->Item(uiIndex); }
+  size_t Count(void) { return m_positionReportArray->Count(); }
+
+private:
+  PositionReportArray* m_positionReportArray;
+};
 
 class Station
 {
