@@ -214,14 +214,22 @@ void positionreport_pi::StationSelected()
 {
   for(size_t i = 0; i < m_stations->Count(); i++)
   {
-    m_stations->Item(i)->m_isSelected = false;
+    for(size_t j = 0; j < m_stations->Item(i)->m_positionReports->Count(); j++)
+    {
+      m_stations->Item(i)->m_positionReports->Item(j)->m_isSelected = false;
+    }
   }
 
   Station *currentStation = m_stations->Find(m_dialog->GetCurrentStationName());
 
   if(currentStation)
   {
-    currentStation->m_isSelected = true;
+    //currentStation->m_isSelected = true;
+    
+    for(size_t j = 0; j < currentStation->m_positionReports->Count(); j++)
+    {
+      currentStation->m_positionReports->Item(j)->m_isSelected = false;
+    }
   }
 
   RequestRefresh(m_parentWindow);

@@ -68,6 +68,8 @@ class PositionReport
     unsigned int m_course; // in deg
     unsigned int m_speed;  // in knots, 99=unknown
     wxString     m_comment;
+
+    bool         m_isSelected;
 };
 
 WX_DEFINE_SORTED_ARRAY(PositionReport*, PositionReports);
@@ -80,8 +82,6 @@ class Station
 
     wxString        m_callsign;
     PositionReports *m_positionReports;
-
-    bool m_isSelected;
 };
 
 WX_DEFINE_SORTED_ARRAY(Station*, StationArray);

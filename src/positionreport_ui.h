@@ -92,6 +92,7 @@ class PositionReportUIDialog: public wxDialog
     void Invalidate(void);
     void updateFileList(void);
     void updateStationList(void);
+    void updatePositionReportList(void);
     void updateStationListSelection(void);
     void updateRawPanel(wxString &awData);
     void updateTextPanel(void);
@@ -110,6 +111,7 @@ class PositionReportUIDialog: public wxDialog
     wxTextCtrl        *m_pitemCurrentDirectoryCtrl;
     wxListCtrl        *m_pFileListCtrl;
     wxListCtrl        *m_pStationListCtrl;
+    wxListCtrl        *m_pPositionReportListCtrl;
     wxTextCtrl        *m_pTextCtrl;
     wxTextCtrl        *m_pRawCtrl;
 };

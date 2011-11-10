@@ -172,6 +172,16 @@ void PositionReportUIDialog::OnChooseDirClick(wxCommandEvent& event)
   }
 }
 
+static void AutoSizeColumns(wxListCtrl *listCtrl)
+{
+  int columnWidth = listCtrl->GetItemCount() > 0 ? wxLIST_AUTOSIZE : wxLIST_AUTOSIZE_USEHEADER;
+  
+  for(int i = 0; i < listCtrl->GetColumnCount(); i++)
+  {
+    listCtrl->SetColumnWidth(i, columnWidth);
+  }
+}
+
 void PositionReportUIDialog::CreateControls()
 {
   int border_size = 4;
@@ -202,11 +212,15 @@ void PositionReportUIDialog::CreateControls()
 
   wxBoxSizer* fpsizer = new wxBoxSizer(wxVERTICAL);
   filepanel->SetSizer(fpsizer);
-        
+
+  wxStaticBox* filePanelStaticBox = new wxStaticBox(filepanel, wxID_ANY, _T("File"));
+  wxStaticBoxSizer* filePanelStaticBoxSizer = new wxStaticBoxSizer(filePanelStaticBox, wxVERTICAL);
+  fpsizer->Add(filePanelStaticBoxSizer, 1, wxEXPAND|wxALL);
+
   m_pFileListCtrl = new wxListCtrl(filepanel, ID_FILELIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
   m_pFileListCtrl->InsertColumn(0, _T("Name"));
   m_pFileListCtrl->InsertColumn(1, _T("Date"));
-  fpsizer->Add(m_pFileListCtrl, 1, wxGROW);
+  filePanelStaticBoxSizer->Add(m_pFileListCtrl, 1, wxGROW);
 
   
   // station panel
@@ -216,14 +230,38 @@ void PositionReportUIDialog::CreateControls()
   wxBoxSizer* spsizer = new wxBoxSizer(wxVERTICAL);
   stationpanel->SetSizer(spsizer);
 
+  wxStaticBox* stationPanelStaticBox = new wxStaticBox(stationpanel, wxID_ANY, _T("Latest Position Reports"));
+  wxStaticBoxSizer* stationPanelStaticBoxSizer = new wxStaticBoxSizer(stationPanelStaticBox, wxVERTICAL);
+  spsizer->Add(stationPanelStaticBoxSizer, 1, wxEXPAND|wxALL);
+
   m_pStationListCtrl = new wxListCtrl(stationpanel, ID_STATIONLIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
   m_pStationListCtrl->InsertColumn(0, _T("Station"));
   m_pStationListCtrl->InsertColumn(1, _T("Date"));
   m_pStationListCtrl->InsertColumn(2, _T("Latitude"));
-  m_pStationListCtrl->InsertColumn(3, _T("Longitue"));
+  m_pStationListCtrl->InsertColumn(3, _T("Longitude"));
   m_pStationListCtrl->InsertColumn(4, _T("Comment"));
-  spsizer->Add(m_pStationListCtrl, 1, wxGROW);
+  stationPanelStaticBoxSizer->Add(m_pStationListCtrl, 1, wxGROW);
 
+
+  // position report panel
+  wxPanel *positionReportpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+  topSizer->Add(positionReportpanel, 1, wxGROW);
+
+  wxBoxSizer* ppsizer = new wxBoxSizer(wxVERTICAL);
+  positionReportpanel->SetSizer(ppsizer);
+
+  wxStaticBox* positionReportPanelStaticBox = new wxStaticBox(positionReportpanel, wxID_ANY, _T("All Position Reports"));
+  wxStaticBoxSizer* positionReportPanelStaticBoxSizer = new wxStaticBoxSizer(positionReportPanelStaticBox, wxVERTICAL);
+  ppsizer->Add(positionReportPanelStaticBoxSizer, 1, wxEXPAND|wxALL);
+    
+  m_pPositionReportListCtrl = new wxListCtrl(positionReportpanel, ID_STATIONLIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT|wxLC_SINGLE_SEL);
+  m_pPositionReportListCtrl->InsertColumn(0, _T("Date"));
+  m_pPositionReportListCtrl->InsertColumn(1, _T("Latitude"));
+  m_pPositionReportListCtrl->InsertColumn(2, _T("Longitude"));
+  m_pPositionReportListCtrl->InsertColumn(3, _T("Comment"));
+  positionReportPanelStaticBoxSizer->Add(m_pPositionReportListCtrl, 1, wxGROW);
+
+  
   // A horizontal box sizer to contain OK
   wxBoxSizer* ackBox = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(ackBox, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
@@ -260,7 +298,9 @@ void PositionReportUIDialog::updateFileList(void)
     m_pFileListCtrl->SetItemData(i, i);
     m_pFileListCtrl->SetItem(i, 1, m_fileDescriptions->Item(i)->m_date.FormatDate());
   }
-  
+
+  AutoSizeColumns(m_pFileListCtrl);
+
   m_currentFileName = wxEmptyString;
 }
 
@@ -291,19 +331,48 @@ void PositionReportUIDialog::updateStationList(void)
       m_pStationListCtrl->SetItem(i, 3, wxString::Format(_T("%f"), positionReport->m_longitude));
       m_pStationListCtrl->SetItem(i, 4, positionReport->m_comment);
 
-      if(station->m_isSelected)
-      {
-        m_pStationListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
-      }
+      //if(station->m_isSelected)
+      //{
+      //  m_pStationListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+      //}
     }
   }
-  
+
+  AutoSizeColumns(m_pStationListCtrl);
+
   m_currentStationName = wxEmptyString;
+  updatePositionReportList();
+}
+
+void PositionReportUIDialog::updatePositionReportList(void)
+{
+  Station *station;
+  PositionReport *positionReport;
+  
+  m_pPositionReportListCtrl->DeleteAllItems();
+
+  station = m_plugin->GetStations()->Find(m_currentStationName);
+  
+  if(station)
+  {
+    for(size_t i = 0; i < station->m_positionReports->Count(); i++)
+    {
+      positionReport = station->m_positionReports->Item(i);
+
+      m_pPositionReportListCtrl->InsertItem(i, positionReport->m_dateTime.FormatDate());
+      m_pPositionReportListCtrl->SetItemData(i, i);
+      m_pPositionReportListCtrl->SetItem(i, 1, wxString::Format(_T("%f"), positionReport->m_latitude));
+      m_pPositionReportListCtrl->SetItem(i, 2, wxString::Format(_T("%f"), positionReport->m_longitude));
+      m_pPositionReportListCtrl->SetItem(i, 3, positionReport->m_comment);
+    }
+
+    AutoSizeColumns(m_pPositionReportListCtrl);
+  }
 }
 
 void PositionReportUIDialog::updateStationListSelection(void)
 {
-  Station *station;
+ /* Station *station;
  
   Stations *stations = m_plugin->GetStations();
   
@@ -324,7 +393,7 @@ void PositionReportUIDialog::updateStationListSelection(void)
     }
   }
   
-  m_currentStationName = wxEmptyString;
+  m_currentStationName = wxEmptyString;*/
 }
 
 void PositionReportUIDialog::OnFileSelect(wxListEvent& event)
@@ -356,6 +425,8 @@ void PositionReportUIDialog::OnStationSelect(wxListEvent& event)
   {
     m_currentStationName = wxEmptyString;
   }
+
+  updatePositionReportList();
 
   m_plugin->StationSelected();
 }
@@ -399,39 +470,49 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
     {
       station = stations->Item(i);
 
-      positionReport = station->m_positionReports->Item(0);
-      GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
+      for(size_t j = 0; j < station->m_positionReports->Count(); j++)
+      {
+        positionReport = station->m_positionReports->Item(j);
+        GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
 
-      if(station->m_isSelected)
-      {
-        GetGlobalColor(_T("RED1"), &colour);
-      }
-      else
-      {
+        if(positionReport->m_isSelected)
+        {
+          GetGlobalColor(_T("RED1"), &colour);
+        }
+        else
+        {
+          if(j == 0)
+          {
+            GetGlobalColor(_T("UBLCK"), &colour);
+          }
+          else
+          {
+            GetGlobalColor(_T("GREY2"), &colour);
+          }
+        }
+        
+        wxPen pen(colour, 2, wxSOLID);
+        pmdc->SetPen(pen);
+
+        wxBrush brush(colour, wxSOLID);
+        pmdc->SetBackground(brush);
+        pmdc->SetBrush(brush);
+
+        pmdc->DrawCircle(point, radius);
+
         GetGlobalColor(_T("UBLCK"), &colour);
+        pmdc->SetTextForeground( colour );
+        wxFont sfont = pmdc->GetFont();
+
+        wxFont *font1 = wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxNORMAL, wxFONTWEIGHT_NORMAL,
+                          FALSE, wxString (_T("Arial"))); 
+        pmdc->SetFont(*font1);
+        pmdc->DrawText(station->m_callsign, point);
+
+        pmdc->SetFont(sfont);
+
+        hasDrawn = true;
       }
-      
-      wxPen pen(colour, 2, wxSOLID);
-      pmdc->SetPen(pen);
-
-      wxBrush brush(colour, wxSOLID);
-      pmdc->SetBackground(brush);
-      pmdc->SetBrush(brush);
-
-      pmdc->DrawCircle(point, radius);
-
-      GetGlobalColor(_T("UBLCK"), &colour);
-      pmdc->SetTextForeground( colour );
-      wxFont sfont = pmdc->GetFont();
-
-      wxFont *font1 = wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxNORMAL, wxFONTWEIGHT_NORMAL,
-                        FALSE, wxString (_T("Arial"))); 
-      pmdc->SetFont(*font1);
-      pmdc->DrawText(station->m_callsign, point);
-
-      pmdc->SetFont(sfont);
-
-      hasDrawn = true;
     }
   }
 

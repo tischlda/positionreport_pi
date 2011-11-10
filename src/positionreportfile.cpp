@@ -52,12 +52,12 @@ static int ComparePositionReports(PositionReport *p1, PositionReport *p2)
 
 PositionReport::PositionReport(void)
 {
+  m_isSelected = false;
 }
 
 Station::Station(void)
 {
   m_positionReports = new PositionReports(ComparePositionReports);
-  m_isSelected = false;
 }
 
 Station::~Station()
@@ -116,17 +116,20 @@ bool Stations::Select(double latitude, double longitude, double delta)
   {
     station = m_stationArray->Item(i);
 
-    positionReport = station->m_positionReports->Item(0);
+    for(size_t j = 0; j < station->m_positionReports->Count(); j++)
+    {
+      positionReport = station->m_positionReports->Item(j);
 
-    if(DistGreatCircle(positionReport->m_latitude, positionReport->m_longitude, latitude, longitude) <= delta)
-    {
-      if(!station->m_isSelected) changed = true;
-      station->m_isSelected = true;
-    }
-    else
-    {
-      if(station->m_isSelected) changed = true;
-      station->m_isSelected = false;
+      if(DistGreatCircle(positionReport->m_latitude, positionReport->m_longitude, latitude, longitude) <= delta)
+      {
+        if(!positionReport->m_isSelected) changed = true;
+        positionReport->m_isSelected = true;
+      }
+      else
+      {
+        if(positionReport->m_isSelected) changed = true;
+        positionReport->m_isSelected = false;
+      }
     }
   }
 
