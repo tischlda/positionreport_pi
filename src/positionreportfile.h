@@ -109,9 +109,10 @@ public:
       PositionReportFileReader(void);
       
       Stations* Read(wxString& filename);
-      Stations* Read(wxInputStream &stream);
+      Stations* ReadAll(wxString& filename);
  
 private:
+      void Read(wxInputStream &stream, Stations* stations);
       void ReadNearbyFile(wxInputStream &stream, wxTextInputStream &text, Stations* stations);
       void ReadPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text, Stations* stations);
       void ReadNextPositionFromPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text, Stations* stations);

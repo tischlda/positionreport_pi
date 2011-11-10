@@ -33,6 +33,7 @@
   #include "wx/wx.h"
 #endif //precompiled headers
 
+#include <wx/dir.h>
 #include <wx/filename.h>
 #include <wx/txtstrm.h>
 #include <wx/tokenzr.h>
@@ -142,19 +143,46 @@ PositionReportFileReader::PositionReportFileReader(void)
 
 Stations* PositionReportFileReader::Read(wxString& filename)
 {
+  Stations *stations = new Stations();
+
   wxFileName file(filename);
   
-  if(file.FileExists() && (file.GetSize() < MaxFileSize)){
+  if(file.FileExists() && (file.GetSize() < MaxFileSize))
+  {
     wxFileInputStream stream(filename); 
-    return Read(stream);
-  } else {
-    return NULL;
+    Read(stream, stations);
   }
+
+  return stations;
 }
 
-Stations* PositionReportFileReader::Read(wxInputStream &stream)
+Stations* PositionReportFileReader::ReadAll(wxString& path)
 {
+  wxLogMessage(_T("Reading all from %s"), path);
   Stations *stations = new Stations();
+  
+  wxArrayString fileNames;
+
+  size_t res = wxDir::GetAllFiles(path, &fileNames, wxEmptyString, wxDIR_FILES);
+
+  for(size_t i = 0; i < fileNames.GetCount(); i++)
+  {
+    wxFileName file(path, fileNames[i]);
+
+    wxLogMessage(_T("Reading %s"), fileNames[i]);
+
+    if(file.FileExists() && (file.GetSize() < MaxFileSize))
+    {
+      wxFileInputStream stream(fileNames[i]); 
+      Read(stream, stations);
+    }
+  }
+
+  return stations;
+}
+
+void PositionReportFileReader::Read(wxInputStream &stream, Stations *stations)
+{
   wxTextInputStream text(stream);
   wxString line;
 
@@ -172,8 +200,6 @@ Stations* PositionReportFileReader::Read(wxInputStream &stream)
       ReadPositionRequestResponseFile(stream, text, stations);
     }
   }
-
-  return stations;
 }
 
 void PositionReportFileReader::ReadNearbyFile(wxInputStream &stream, wxTextInputStream &text, Stations *stations)

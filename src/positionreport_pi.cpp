@@ -205,6 +205,7 @@ void positionreport_pi::FileSelected()
   PositionReportFileReader reader;
 
   m_stations = reader.Read(m_dialog->GetCurrentFileName());
+
   m_dialog->OnDataChanged();
 
   RequestRefresh(m_parentWindow);
