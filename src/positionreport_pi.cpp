@@ -224,11 +224,9 @@ void positionreport_pi::StationSelected()
 
   if(currentStation)
   {
-    //currentStation->m_isSelected = true;
-    
     for(size_t j = 0; j < currentStation->m_positionReports->Count(); j++)
     {
-      currentStation->m_positionReports->Item(j)->m_isSelected = false;
+      currentStation->m_positionReports->Item(j)->m_isSelected = true;
     }
   }
 
