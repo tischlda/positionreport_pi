@@ -346,28 +346,34 @@ void PositionReportUIDialog::updateStationList(void)
 
 void PositionReportUIDialog::updatePositionReportList(void)
 {
+  Stations *stations;
   Station *station;
   PositionReport *positionReport;
   
   m_pPositionReportListCtrl->DeleteAllItems();
 
-  station = m_plugin->GetStations()->Find(m_currentStationName);
-  
-  if(station)
+  stations = m_plugin->GetStations();
+
+  if(stations)
   {
-    for(size_t i = 0; i < station->m_positionReports->Count(); i++)
+    station = stations->Find(m_currentStationName);
+    
+    if(station)
     {
-      positionReport = station->m_positionReports->Item(i);
+      for(size_t i = 0; i < station->m_positionReports->Count(); i++)
+      {
+        positionReport = station->m_positionReports->Item(i);
 
-      m_pPositionReportListCtrl->InsertItem(i, positionReport->m_dateTime.FormatDate());
-      m_pPositionReportListCtrl->SetItemData(i, i);
-      m_pPositionReportListCtrl->SetItem(i, 1, wxString::Format(_T("%f"), positionReport->m_latitude));
-      m_pPositionReportListCtrl->SetItem(i, 2, wxString::Format(_T("%f"), positionReport->m_longitude));
-      m_pPositionReportListCtrl->SetItem(i, 3, positionReport->m_comment);
+        m_pPositionReportListCtrl->InsertItem(i, positionReport->m_dateTime.FormatDate());
+        m_pPositionReportListCtrl->SetItemData(i, i);
+        m_pPositionReportListCtrl->SetItem(i, 1, wxString::Format(_T("%f"), positionReport->m_latitude));
+        m_pPositionReportListCtrl->SetItem(i, 2, wxString::Format(_T("%f"), positionReport->m_longitude));
+        m_pPositionReportListCtrl->SetItem(i, 3, positionReport->m_comment);
+      }
     }
-
-    AutoSizeColumns(m_pPositionReportListCtrl);
   }
+
+  AutoSizeColumns(m_pPositionReportListCtrl);
 }
 
 void PositionReportUIDialog::updateStationListSelection(void)
