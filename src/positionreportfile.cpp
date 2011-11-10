@@ -154,6 +154,7 @@ Stations* PositionReportFileReader::Read(wxString& filename)
 
 Stations* PositionReportFileReader::Read(wxInputStream &stream)
 {
+  Stations *stations = new Stations();
   wxTextInputStream text(stream);
   wxString line;
 
@@ -163,24 +164,23 @@ Stations* PositionReportFileReader::Read(wxInputStream &stream)
 
     if(line.StartsWith(_T("List of users nearby")))
     {
-      return ReadNearbyFile(stream, text);
+      ReadNearbyFile(stream, text, stations);
     }
 
     if(line.StartsWith(_T("Automated Reply Message from Winlink 2000 Position Report Processor")))
     {
-      return ReadPositionRequestResponseFile(stream, text);
+      ReadPositionRequestResponseFile(stream, text, stations);
     }
   }
 
-  return NULL;
+  return stations;
 }
 
-Stations* PositionReportFileReader::ReadNearbyFile(wxInputStream &stream, wxTextInputStream &text)
+void PositionReportFileReader::ReadNearbyFile(wxInputStream &stream, wxTextInputStream &text, Stations *stations)
 {
   wxString line;
   bool headerRead = false;
 
-  Stations *stations;
   Station *station;
   PositionReport *positionReport;
 
@@ -190,8 +190,6 @@ Stations* PositionReportFileReader::ReadNearbyFile(wxInputStream &stream, wxText
   wxDateTime dateTime;
   wxString comment;
 
-
-  stations = new Stations();
   
   while(stream.IsOk() && !stream.Eof())
   {
@@ -245,18 +243,12 @@ Stations* PositionReportFileReader::ReadNearbyFile(wxInputStream &stream, wxText
       }
     }
   }
-
-  return stations;
 }
 
-Stations* PositionReportFileReader::ReadPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text)
+void PositionReportFileReader::ReadPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text, Stations *stations)
 {
   wxString line;
 
-  Stations *stations;
-
-  stations = new Stations();
-  
   text.ReadLine();
   text.ReadLine();
 
@@ -264,8 +256,6 @@ Stations* PositionReportFileReader::ReadPositionRequestResponseFile(wxInputStrea
   {
     ReadNextPositionFromPositionRequestResponseFile(stream, text, stations);
   }
-
-  return stations;
 }
 
 void PositionReportFileReader::ReadNextPositionFromPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text, Stations* stations)

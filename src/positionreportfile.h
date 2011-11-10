@@ -110,8 +110,10 @@ public:
       
       Stations* Read(wxString& filename);
       Stations* Read(wxInputStream &stream);
-      Stations* ReadNearbyFile(wxInputStream &stream, wxTextInputStream &text);
-      Stations* ReadPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text);
+ 
+private:
+      void ReadNearbyFile(wxInputStream &stream, wxTextInputStream &text, Stations* stations);
+      void ReadPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text, Stations* stations);
       void ReadNextPositionFromPositionRequestResponseFile(wxInputStream &stream, wxTextInputStream &text, Stations* stations);
 
       static const size_t MaxFileSize = 10000;
