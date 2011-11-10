@@ -75,6 +75,18 @@ void PositionReports::Add(PositionReport* positionReport)
   m_positionReportArray->Add(positionReport);
 }
 
+PositionReport* PositionReports::Find(wxDateTime& dateTime)
+{
+  for(size_t i = 0; i < m_positionReportArray->Count(); i++)
+  {
+    if(m_positionReportArray->Item(i)->m_dateTime.IsEqualTo(dateTime))
+    {
+      return m_positionReportArray->Item(i);
+    }
+  }
+  return NULL;
+}
+
 Station::Station(void)
 {
   m_positionReports = new PositionReports();
@@ -272,15 +284,18 @@ void PositionReportFileReader::ReadNearbyFile(wxInputStream &stream, wxTextInput
           stations->Add(station);
         }
 
-        positionReport = new PositionReport();
-        positionReport->m_distance = distance;
-        positionReport->m_bearing = bearing;
-        positionReport->m_comment = comment;
-        positionReport->m_dateTime = dateTime;
-        positionReport->m_latitude = lat;
-        positionReport->m_longitude = lon;
+        if(!station->m_positionReports->Find(dateTime))
+        {
+          positionReport = new PositionReport();
+          positionReport->m_distance = distance;
+          positionReport->m_bearing = bearing;
+          positionReport->m_comment = comment;
+          positionReport->m_dateTime = dateTime;
+          positionReport->m_latitude = lat;
+          positionReport->m_longitude = lon;
 
-        station->m_positionReports->Add(positionReport);
+          station->m_positionReports->Add(positionReport);
+        }
       }
     }
   }
@@ -329,15 +344,18 @@ void PositionReportFileReader::ReadNextPositionFromPositionRequestResponseFile(w
           stations->Add(station);
         }
 
-        positionReport = new PositionReport();
-        positionReport->m_distance = distance;
-        positionReport->m_bearing = bearing;
-        positionReport->m_comment = comment;
-        positionReport->m_dateTime = dateTime;
-        positionReport->m_latitude = lat;
-        positionReport->m_longitude = lon;
+        if(!station->m_positionReports->Find(dateTime))
+        {
+          positionReport = new PositionReport();
+          positionReport->m_distance = distance;
+          positionReport->m_bearing = bearing;
+          positionReport->m_comment = comment;
+          positionReport->m_dateTime = dateTime;
+          positionReport->m_latitude = lat;
+          positionReport->m_longitude = lon;
 
-        station->m_positionReports->Add(positionReport);
+          station->m_positionReports->Add(positionReport);
+        }
       }
 
       return;

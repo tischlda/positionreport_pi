@@ -81,7 +81,7 @@ public:
   ~PositionReports(void);
 
   void Add(PositionReport* positionReport);
-
+  PositionReport* Find(wxDateTime& dateTime);
   PositionReport* Item(size_t uiIndex) { return m_positionReportArray->Item(uiIndex); }
   size_t Count(void) { return m_positionReportArray->Count(); }
 
@@ -124,7 +124,7 @@ public:
       PositionReportFileReader(void);
       
       Stations* Read(wxString& filename);
-      Stations* ReadAll(wxString& filename);
+      Stations* ReadAll(wxString& path);
  
 private:
       void Read(wxInputStream &stream, Stations* stations);
