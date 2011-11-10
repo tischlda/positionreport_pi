@@ -290,6 +290,37 @@ void PositionReportUIDialog::updateStationList(void)
       m_pStationListCtrl->SetItem(i, 2, wxString::Format(_T("%f"), positionReport->m_latitude));
       m_pStationListCtrl->SetItem(i, 3, wxString::Format(_T("%f"), positionReport->m_longitude));
       m_pStationListCtrl->SetItem(i, 4, positionReport->m_comment);
+
+      if(station->m_isSelected)
+      {
+        m_pStationListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+      }
+    }
+  }
+  
+  m_currentStationName = wxEmptyString;
+}
+
+void PositionReportUIDialog::updateStationListSelection(void)
+{
+  Station *station;
+ 
+  Stations *stations = m_plugin->GetStations();
+  
+  if(stations)
+  {
+    for(size_t i = 0; i < stations->Count(); i++)
+    {
+      station = stations->Item(i);
+      
+      if(station->m_isSelected)
+      {
+        m_pStationListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+      }
+      else
+      {
+        m_pStationListCtrl->SetItemState(i, 0, wxLIST_STATE_SELECTED);
+      }
     }
   }
   
@@ -332,6 +363,25 @@ void PositionReportUIDialog::OnStationSelect(wxListEvent& event)
 void PositionReportUIDialog::OnDataChanged(void)
 {
   updateStationList();
+}
+
+void PositionReportUIDialog::OnStationDataChanged(void)
+{
+  updateStationListSelection();
+}
+
+void PositionReportUIDialog::SetCurrentStationName(wxString& stationName)
+{
+  for(size_t i = 0; i < m_stationNameArray.Count(); i++)
+  {
+    if(m_stationNameArray[i] == stationName)
+    {
+      m_pStationListCtrl->SetItemState(i, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+      wxListEvent ev(wxEVT_NULL, 0);
+      OnStationSelect(ev);
+      return;
+    }
+  }
 }
 
 bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations)

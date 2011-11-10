@@ -72,6 +72,10 @@ SET(SRC_POSITIONREPORT
  	src/positionreportfile.h
  	src/positionreportfile.cpp
  	src/icons.cpp
+ 	../../include/cutil.h
+  	../../src/cutil.c
+ 	../../include/georef.h
+  	../../src/georef.c
  	)
 ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_POSITIONREPORT})
 

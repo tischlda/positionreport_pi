@@ -94,6 +94,7 @@ class Stations
 
     void Add(Station* station);
     Station* Find(wxString& callsign);
+    bool Select(double latitude, double longitude, double delta);
 
     Station* Item(size_t uiIndex) { return m_stationArray->Item(uiIndex); }
     size_t Count(void) { return m_stationArray->Count(); }

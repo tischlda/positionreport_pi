@@ -39,6 +39,8 @@
 #include <ctype.h>
 
 #include "PositionReportFile.h"
+#include <math.h>
+#include "../../../include/georef.h"
 
 static int ComparePositionReports(PositionReport *p1, PositionReport *p2)
 {
@@ -100,6 +102,34 @@ Station* Stations::Find(wxString& callsign)
     }
   }
   return NULL;
+}
+
+bool Stations::Select(double latitude, double longitude, double delta)
+{
+  bool changed = false;
+
+  Station* station;
+  PositionReport* positionReport;
+
+  for(size_t i = 0; i < m_stationArray->Count(); i++)
+  {
+    station = m_stationArray->Item(i);
+
+    positionReport = station->m_positionReports->Item(0);
+
+    if(DistGreatCircle(positionReport->m_latitude, positionReport->m_longitude, latitude, longitude) <= delta)
+    {
+      if(!station->m_isSelected) changed = true;
+      station->m_isSelected = true;
+    }
+    else
+    {
+      if(station->m_isSelected) changed = true;
+      station->m_isSelected = false;
+    }
+  }
+
+  return changed;
 }
 
 PositionReportFileReader::PositionReportFileReader(void)

@@ -188,6 +188,14 @@ bool positionreport_pi::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp)
 
 void positionreport_pi::SetCursorLatLon(double lat, double lon)
 {
+  if(m_stations)
+  {
+    if(m_stations->Select(lat, lon, 0.1))
+    {
+      m_dialog->OnStationDataChanged();
+      RequestRefresh(m_parentWindow);
+    }
+  }
 }
 
 void positionreport_pi::FileSelected()

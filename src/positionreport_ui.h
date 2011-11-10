@@ -82,14 +82,17 @@ class PositionReportUIDialog: public wxDialog
     void OnStationSelect(wxListEvent& event);
 
     void OnDataChanged(void);
+    void OnStationDataChanged(void);
 
     wxString GetCurrentFileName(void) { return m_currentFileName; }
     wxString GetCurrentStationName(void) { return m_currentStationName; }
+    void SetCurrentStationName(wxString& stationName);
 
   private:
     void Invalidate(void);
     void updateFileList(void);
     void updateStationList(void);
+    void updateStationListSelection(void);
     void updateRawPanel(wxString &awData);
     void updateTextPanel(void);
 
