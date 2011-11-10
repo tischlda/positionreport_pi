@@ -194,7 +194,7 @@ void PositionReportUIDialog::CreateControls()
 
 
   // The Position Report directory
-  wxStaticBox* itemStaticBoxSizer11Static = new wxStaticBox (this, wxID_ANY, _T("PositionReport File Directory"));
+  wxStaticBox* itemStaticBoxSizer11Static = new wxStaticBox (this, wxID_ANY, _T("Position Report Directory"));
   wxStaticBoxSizer *itemStaticBoxSizer11 = new wxStaticBoxSizer (itemStaticBoxSizer11Static, wxHORIZONTAL);
   topSizer->Add (itemStaticBoxSizer11, 0, wxEXPAND);
 
@@ -296,7 +296,7 @@ void PositionReportUIDialog::updateFileList(void)
   {
     m_pFileListCtrl->InsertItem(i, m_fileDescriptions->Item(i)->m_name);
     m_pFileListCtrl->SetItemData(i, i);
-    m_pFileListCtrl->SetItem(i, 1, m_fileDescriptions->Item(i)->m_date.FormatDate());
+    m_pFileListCtrl->SetItem(i, 1, m_fileDescriptions->Item(i)->m_date.FormatDate() + _T(" ") + m_fileDescriptions->Item(i)->m_date.FormatTime());
   }
 
   AutoSizeColumns(m_pFileListCtrl);
@@ -326,7 +326,7 @@ void PositionReportUIDialog::updateStationList(void)
 
       m_pStationListCtrl->InsertItem(i, station->m_callsign);
       m_pStationListCtrl->SetItemData(i, i);
-      m_pStationListCtrl->SetItem(i, 1, positionReport->m_dateTime.FormatDate());
+      m_pStationListCtrl->SetItem(i, 1, positionReport->m_dateTime.FormatDate() + _T(" ") + positionReport->m_dateTime.FormatTime());
       m_pStationListCtrl->SetItem(i, 2, wxString::Format(_T("%f"), positionReport->m_latitude));
       m_pStationListCtrl->SetItem(i, 3, wxString::Format(_T("%f"), positionReport->m_longitude));
       m_pStationListCtrl->SetItem(i, 4, positionReport->m_comment);
@@ -364,7 +364,7 @@ void PositionReportUIDialog::updatePositionReportList(void)
       {
         positionReport = station->m_positionReports->Item(i);
 
-        m_pPositionReportListCtrl->InsertItem(i, positionReport->m_dateTime.FormatDate());
+        m_pPositionReportListCtrl->InsertItem(i, positionReport->m_dateTime.FormatDate() + _T(" ") + positionReport->m_dateTime.FormatTime());
         m_pPositionReportListCtrl->SetItemData(i, i);
         m_pPositionReportListCtrl->SetItem(i, 1, wxString::Format(_T("%f"), positionReport->m_latitude));
         m_pPositionReportListCtrl->SetItem(i, 2, wxString::Format(_T("%f"), positionReport->m_longitude));
@@ -464,7 +464,9 @@ void PositionReportUIDialog::SetCurrentStationName(wxString& stationName)
 bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations)
 {
   bool hasDrawn = false;
+  bool firstPosition;
   wxPoint point;
+  wxPoint prevPoint;
   wxCoord radius(5);
   wxColour colour;
   PositionReport *positionReport;
@@ -476,20 +478,30 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
     {
       station = stations->Item(i);
 
+      firstPosition = true;
+
       for(size_t j = 0; j < station->m_positionReports->Count(); j++)
       {
         positionReport = station->m_positionReports->Item(j);
         GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
 
+        if(!firstPosition)
+        {
+          GetGlobalColor(_T("URED"), &colour);
+          wxPen pen(colour, 2, wxSOLID);
+          pmdc->SetPen(pen);
+          pmdc->DrawLine(prevPoint, point);
+        }
+
         if(positionReport->m_isSelected)
         {
-          GetGlobalColor(_T("RED1"), &colour);
+          GetGlobalColor(_T("URED"), &colour);
         }
         else
         {
           if(j == 0)
           {
-            GetGlobalColor(_T("UBLCK"), &colour);
+            GetGlobalColor(_T("GREY1"), &colour);
           }
           else
           {
@@ -518,6 +530,8 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
         pmdc->SetFont(sfont);
 
         hasDrawn = true;
+        firstPosition = false;
+        prevPoint = point;
       }
     }
   }

@@ -222,7 +222,7 @@ Stations* PositionReportFileReader::ReadNearbyFile(wxInputStream &stream, wxText
              lon = (lonDeg + (lonMin / 60)) * (line.Mid(46, 1) == _T("E")  ? 1 : -1);
         }
 
-        dateTime.ParseDate(line.Mid(49, 16));
+        dateTime.ParseDateTime(line.Mid(49, 16));
         comment = (line.Mid(66));
 
         station = stations->Find(callsign);
@@ -332,7 +332,7 @@ void PositionReportFileReader::ReadNextPositionFromPositionRequestResponseFile(w
            lon = (lonDeg + (lonMin / 60)) * (line.Mid(46, 1) == _T("E")  ? 1 : -1);
       }
 
-      dateTime.ParseDate(tokens.Item(1) + _T(" ") + tokens.Item(2));
+      dateTime.ParseDateTime(tokens.Item(1) + _T(" ") + tokens.Item(2));
     }
     else if(line.StartsWith(_T("Comment: ")))
     {
