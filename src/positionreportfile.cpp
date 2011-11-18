@@ -372,13 +372,13 @@ void PositionReportFileReader::ReadNextPositionFromPositionRequestResponseFile(w
       if(tokens.Item(3).Mid(0, 2).ToDouble(&latDeg) &&
          tokens.Item(3).Mid(3, 5).ToDouble(&latMin))
       {
-           lat = (latDeg + (latMin / 60)) * (line.Mid(35, 1) == _T("N") ? 1 : -1);
+           lat = (latDeg + (latMin / 60)) * (tokens.Item(3).Mid(8, 1) == _T("N") ? 1 : -1);
       }
 
       if(tokens.Item(4).Mid(0, 3).ToDouble(&lonDeg) &&
          tokens.Item(4).Mid(4, 5).ToDouble(&lonMin))
       {
-           lon = (lonDeg + (lonMin / 60)) * (line.Mid(46, 1) == _T("E")  ? 1 : -1);
+           lon = (lonDeg + (lonMin / 60)) * (tokens.Item(4).Mid(9, 1) == _T("E")  ? 1 : -1);
       }
 
       dateTime.ParseDateTime(tokens.Item(1) + _T(" ") + tokens.Item(2));
