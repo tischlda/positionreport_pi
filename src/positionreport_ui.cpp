@@ -461,23 +461,22 @@ void PositionReportUIDialog::SetCurrentStationName(wxString& stationName)
   }
 }
 
-bool PointInLLBox(PlugIn_ViewPort *vp, double x, double y)
+bool PointInLLBox(PlugIn_ViewPort *vp, double latitude, double longitude)
 {
-    if (  x >= (vp->lon_min) && x <= (vp->lon_max) &&
-            y >= (vp->lat_min) && y <= (vp->lat_max) )
-            return TRUE;
-    return FALSE;
+    if(longitude >= (vp->lon_min) && longitude <= (vp->lon_max) &&
+       latitude >= (vp->lat_min) && latitude <= (vp->lat_max))
+            return true;
+    
+    if((longitude - 360.0) >= (vp->lon_min) && (longitude - 360.0) <= (vp->lon_max) &&
+       latitude >= (vp->lat_min) && latitude <= (vp->lat_max))
+            return true;
+
+    return false;
 }
 
 bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations)
 {
   bool hasDrawn = false;
-  bool firstPosition;
-  wxPoint point;
-  wxPoint prevPoint;
-  wxCoord radius(5);
-  wxColour colour;
-  PositionReport *positionReport;
   Station *station;
 
   if(stations)
@@ -486,66 +485,106 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
     {
       station = stations->Item(i);
 
-      firstPosition = true;
+      hasDrawn |= DrawTrack(pmdc, vp, station);
+      hasDrawn |= DrawPositions(pmdc, vp, station);
+    }
+  }
 
-      for(size_t j = 0; j < station->m_positionReports->Count(); j++)
+  return hasDrawn;
+}
+
+bool PositionReportRenderer::DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station)
+{
+  bool hasDrawn = false;
+  bool firstPosition = true;
+  wxPoint point;
+  wxPoint prevPoint;
+  bool visible;
+  bool prevVisible;
+  PositionReport *positionReport;
+  
+  wxColour colour;
+  GetGlobalColor(_T("URED"), &colour);
+  wxPen pen(colour, 2, wxSOLID);
+  pmdc->SetPen(pen);
+
+  for(size_t i = 0; i < station->m_positionReports->Count(); i++)
+  {
+    positionReport = station->m_positionReports->Item(i);
+    GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
+    visible = PointInLLBox(vp, positionReport->m_latitude, positionReport->m_longitude);
+
+    if(!firstPosition)
+    {
+      if(visible || prevVisible)
       {
-        positionReport = station->m_positionReports->Item(j);
-        GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
-
-        if(PointInLLBox(vp, positionReport->m_longitude, positionReport->m_latitude) ||
-           PointInLLBox(vp, positionReport->m_longitude-360., positionReport->m_latitude))
-        {
-          if(!firstPosition)
-          {
-            GetGlobalColor(_T("URED"), &colour);
-            wxPen pen(colour, 2, wxSOLID);
-            pmdc->SetPen(pen);
-            pmdc->DrawLine(prevPoint, point);
-          }
-
-          if(positionReport->m_isSelected)
-          {
-            GetGlobalColor(_T("URED"), &colour);
-          }
-          else
-          {
-            if(j == 0)
-            {
-              GetGlobalColor(_T("GREY1"), &colour);
-            }
-            else
-            {
-              GetGlobalColor(_T("GREY2"), &colour);
-            }
-          }
-          
-          wxPen pen(colour, 2, wxSOLID);
-          pmdc->SetPen(pen);
-
-          wxBrush brush(colour, wxSOLID);
-          pmdc->SetBackground(brush);
-          pmdc->SetBrush(brush);
-
-          pmdc->DrawCircle(point, radius);
-
-          GetGlobalColor(_T("UBLCK"), &colour);
-          pmdc->SetTextForeground( colour );
-          wxFont sfont = pmdc->GetFont();
-
-          wxFont *font1 = wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxNORMAL, wxFONTWEIGHT_NORMAL,
-                            FALSE, wxString (_T("Arial"))); 
-          pmdc->SetFont(*font1);
-          pmdc->DrawText(station->m_callsign, point);
-
-          pmdc->SetFont(sfont);
-
-          firstPosition = false;
-          hasDrawn = true;
-        }
-
-        prevPoint = point;
+        pmdc->DrawLine(prevPoint, point);
+        hasDrawn = true;
       }
+    }
+    else
+    {
+      firstPosition = false;
+    }
+
+    prevPoint = point;
+    prevVisible = visible;
+  }
+
+  return hasDrawn;
+}
+
+bool PositionReportRenderer::DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station)
+{
+  bool hasDrawn = false;
+  wxPoint point;
+  wxCoord radius(10);
+  wxColour colour;
+  PositionReport *positionReport;
+
+  wxFont *font = wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxNORMAL, wxFONTWEIGHT_NORMAL, FALSE, wxString (_T("Arial"))); 
+
+  for(size_t i = 0; i < station->m_positionReports->Count(); i++)
+  {
+    positionReport = station->m_positionReports->Item(i);
+    GetCanvasPixLL(vp, &point, positionReport->m_latitude, positionReport->m_longitude);
+
+    if(PointInLLBox(vp, positionReport->m_latitude, positionReport->m_longitude))
+    {
+      if(positionReport->m_isSelected)
+      {
+        GetGlobalColor(_T("URED"), &colour);
+      }
+      else
+      {
+        if(i == 0)
+        {
+          GetGlobalColor(_T("GREY1"), &colour);
+        }
+        else
+        {
+          GetGlobalColor(_T("GREY2"), &colour);
+        }
+      }
+      
+      wxPen pen(colour, 2, wxSOLID);
+      pmdc->SetPen(pen);
+
+      wxBrush brush(colour, wxSOLID);
+      pmdc->SetBackground(brush);
+      pmdc->SetBrush(brush);
+
+      pmdc->DrawCircle(point, radius);
+
+      GetGlobalColor(_T("UBLCK"), &colour);
+      pmdc->SetTextForeground( colour );
+
+      wxFont prevFont = pmdc->GetFont();
+      pmdc->SetFont(*font);
+      pmdc->DrawText(station->m_callsign, point);
+      pmdc->SetFont(prevFont);
+
+      hasDrawn = true;
     }
   }
 

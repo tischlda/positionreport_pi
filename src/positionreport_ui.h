@@ -130,6 +130,10 @@ class PositionReportRenderer
 {
   public:
     bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations);
+
+  private:
+    bool DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station);
+    bool DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station);
 };
 
 #endif
