@@ -126,12 +126,25 @@ class StationList : wxListCtrl
     wxString           m_currentStationName;
 };
 
+class RendererConfiguration
+{
+  public:
+    bool  ShowTracks;
+    int   MaxPositions;
+
+    bool  LabelCallsign;
+    bool  LabelDateTime;
+};
+
 class PositionReportRenderer
 {
   public:
+    PositionReportRenderer();
     bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations);
 
   private:
+    RendererConfiguration *m_configuration;
+
     bool DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station);
     bool DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station);
 };

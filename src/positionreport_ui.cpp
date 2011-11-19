@@ -474,6 +474,15 @@ bool PointInLLBox(PlugIn_ViewPort *vp, double latitude, double longitude)
     return false;
 }
 
+PositionReportRenderer::PositionReportRenderer()
+{
+  m_configuration = new RendererConfiguration();
+  m_configuration->ShowTracks = true;
+  m_configuration->MaxPositions = 10;
+  m_configuration->LabelCallsign = true;
+  m_configuration->LabelDateTime = true;
+}
+
 bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations)
 {
   bool hasDrawn = false;
@@ -485,7 +494,7 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
     {
       station = stations->Item(i);
 
-      hasDrawn |= DrawTrack(pmdc, vp, station);
+      if(m_configuration->ShowTracks) hasDrawn |= DrawTrack(pmdc, vp, station);
       hasDrawn |= DrawPositions(pmdc, vp, station);
     }
   }
@@ -502,11 +511,7 @@ bool PositionReportRenderer::DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, St
   bool visible;
   bool prevVisible;
   PositionReport *positionReport;
-  
   wxColour colour;
-  GetGlobalColor(_T("URED"), &colour);
-  wxPen pen(colour, 2, wxSOLID);
-  pmdc->SetPen(pen);
 
   for(size_t i = 0; i < station->m_positionReports->Count(); i++)
   {
@@ -518,6 +523,13 @@ bool PositionReportRenderer::DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, St
     {
       if(visible || prevVisible)
       {
+        if(positionReport->m_isSelected)
+          GetGlobalColor(_T("URED"), &colour);
+        else
+          GetGlobalColor(_T("GREY1"), &colour);
+        
+        wxPen pen(colour, 2, wxSOLID);
+        pmdc->SetPen(pen);
         pmdc->DrawLine(prevPoint, point);
         hasDrawn = true;
       }
@@ -538,8 +550,11 @@ bool PositionReportRenderer::DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
 {
   bool hasDrawn = false;
   wxPoint point;
-  wxCoord radius(10);
+  wxPoint textPoint;
+  wxCoord radius;
   wxColour colour;
+  wxString label;
+  wxSize size;
   PositionReport *positionReport;
 
   wxFont *font = wxTheFontList->FindOrCreateFont(8, wxFONTFAMILY_SWISS, wxNORMAL, wxFONTWEIGHT_NORMAL, FALSE, wxString (_T("Arial"))); 
@@ -552,36 +567,53 @@ bool PositionReportRenderer::DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
     if(PointInLLBox(vp, positionReport->m_latitude, positionReport->m_longitude))
     {
       if(positionReport->m_isSelected)
-      {
         GetGlobalColor(_T("URED"), &colour);
-      }
       else
-      {
-        if(i == 0)
-        {
-          GetGlobalColor(_T("GREY1"), &colour);
-        }
-        else
-        {
-          GetGlobalColor(_T("GREY2"), &colour);
-        }
-      }
-      
+        GetGlobalColor(_T("GREY1"), &colour);
+
       wxPen pen(colour, 2, wxSOLID);
       pmdc->SetPen(pen);
 
+      GetGlobalColor(_T("GREY2"), &colour);
       wxBrush brush(colour, wxSOLID);
-      pmdc->SetBackground(brush);
       pmdc->SetBrush(brush);
 
-      pmdc->DrawCircle(point, radius);
+      if(i == 0)
+      {
+        pmdc->DrawCircle(point, 8);
+        pmdc->DrawCircle(point, 1);
+      }
+      else
+      {
+        pmdc->DrawCircle(point, 5);
+        pmdc->DrawCircle(point, 1);
+      }
 
       GetGlobalColor(_T("UBLCK"), &colour);
-      pmdc->SetTextForeground( colour );
+      pmdc->SetTextForeground(colour);
 
       wxFont prevFont = pmdc->GetFont();
       pmdc->SetFont(*font);
-      pmdc->DrawText(station->m_callsign, point);
+
+      textPoint = point;
+      
+      if(m_configuration->LabelCallsign)
+      {
+        label = station->m_callsign;
+        size = pmdc->GetTextExtent(label);
+        pmdc->DrawText(label, textPoint);
+        textPoint.y += size.GetHeight();
+      }
+      
+      if(m_configuration->LabelDateTime)
+      {
+        label = positionReport->m_dateTime.FormatDate() + _T(" ") +
+                positionReport->m_dateTime.FormatTime();
+        size = pmdc->GetTextExtent(label);
+        pmdc->DrawText(label, textPoint);
+        textPoint.y += size.GetHeight();
+      }
+      
       pmdc->SetFont(prevFont);
 
       hasDrawn = true;
