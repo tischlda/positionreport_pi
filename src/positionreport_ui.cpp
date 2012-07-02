@@ -483,7 +483,7 @@ PositionReportRenderer::PositionReportRenderer()
   m_configuration->LabelDateTime = true;
 }
 
-bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Stations *stations)
+bool PositionReportRenderer::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp, Stations *stations)
 {
   bool hasDrawn = false;
   Station *station;
@@ -494,15 +494,15 @@ bool PositionReportRenderer::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
     {
       station = stations->Item(i);
 
-      if(m_configuration->ShowTracks) hasDrawn |= DrawTrack(pmdc, vp, station);
-      hasDrawn |= DrawPositions(pmdc, vp, station);
+      if(m_configuration->ShowTracks) hasDrawn |= DrawTrack(dc, vp, station);
+      hasDrawn |= DrawPositions(dc, vp, station);
     }
   }
 
   return hasDrawn;
 }
 
-bool PositionReportRenderer::DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station)
+bool PositionReportRenderer::DrawTrack(wxDC &dc, PlugIn_ViewPort *vp, Station *station)
 {
   bool hasDrawn = false;
   bool firstPosition = true;
@@ -529,8 +529,8 @@ bool PositionReportRenderer::DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, St
           GetGlobalColor(_T("GREY1"), &colour);
         
         wxPen pen(colour, 2, wxSOLID);
-        pmdc->SetPen(pen);
-        pmdc->DrawLine(prevPoint, point);
+        dc.SetPen(pen);
+        dc.DrawLine(prevPoint, point);
         hasDrawn = true;
       }
     }
@@ -546,7 +546,7 @@ bool PositionReportRenderer::DrawTrack(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, St
   return hasDrawn;
 }
 
-bool PositionReportRenderer::DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp, Station *station)
+bool PositionReportRenderer::DrawPositions(wxDC &dc, PlugIn_ViewPort *vp, Station *station)
 {
   bool hasDrawn = false;
   wxPoint point;
@@ -572,36 +572,36 @@ bool PositionReportRenderer::DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
         GetGlobalColor(_T("GREY1"), &colour);
 
       wxPen pen(colour, 2, wxSOLID);
-      pmdc->SetPen(pen);
+      dc.SetPen(pen);
 
       GetGlobalColor(_T("GREY2"), &colour);
       wxBrush brush(colour, wxSOLID);
-      pmdc->SetBrush(brush);
+      dc.SetBrush(brush);
 
       if(i == 0)
       {
-        pmdc->DrawCircle(point, 8);
-        pmdc->DrawCircle(point, 1);
+        dc.DrawCircle(point, 8);
+        dc.DrawCircle(point, 1);
       }
       else
       {
-        pmdc->DrawCircle(point, 5);
-        pmdc->DrawCircle(point, 1);
+        dc.DrawCircle(point, 5);
+        dc.DrawCircle(point, 1);
       }
 
       GetGlobalColor(_T("UBLCK"), &colour);
-      pmdc->SetTextForeground(colour);
+      dc.SetTextForeground(colour);
 
-      wxFont prevFont = pmdc->GetFont();
-      pmdc->SetFont(*font);
+      wxFont prevFont = dc.GetFont();
+      dc.SetFont(*font);
 
       textPoint = point;
       
       if(m_configuration->LabelCallsign)
       {
         label = station->m_callsign;
-        size = pmdc->GetTextExtent(label);
-        pmdc->DrawText(label, textPoint);
+        size = dc.GetTextExtent(label);
+        dc.DrawText(label, textPoint);
         textPoint.y += size.GetHeight();
       }
       
@@ -609,12 +609,12 @@ bool PositionReportRenderer::DrawPositions(wxMemoryDC *pmdc, PlugIn_ViewPort *vp
       {
         label = positionReport->m_dateTime.FormatDate() + _T(" ") +
                 positionReport->m_dateTime.FormatTime();
-        size = pmdc->GetTextExtent(label);
-        pmdc->DrawText(label, textPoint);
+        size = dc.GetTextExtent(label);
+        dc.DrawText(label, textPoint);
         textPoint.y += size.GetHeight();
       }
       
-      pmdc->SetFont(prevFont);
+      dc.SetFont(prevFont);
 
       hasDrawn = true;
     }

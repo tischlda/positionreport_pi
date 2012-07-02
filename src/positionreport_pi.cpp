@@ -55,7 +55,7 @@ extern "C" DECL_EXP void destroy_pi(opencpn_plugin* p)
 #include "icons.h"
 
 positionreport_pi::positionreport_pi(void *ppimgr)
-      :opencpn_plugin(ppimgr)
+      :opencpn_plugin_16(ppimgr)
 {
   initialize_images();
 
@@ -77,7 +77,7 @@ int positionreport_pi::Init(void)
   LoadConfig();
 
   m_parentWindow = GetOCPNCanvasWindow();
-
+  
   m_leftclick_tool_id  = InsertPlugInTool(
     _T(""), _img_positionreport_pi, _img_positionreport_pi, wxITEM_NORMAL,
     _("PositionReport"), _T(""), NULL,
@@ -174,11 +174,11 @@ void positionreport_pi::OnDialogClose()
   SaveConfig();
 }
 
-bool positionreport_pi::RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp)
+bool positionreport_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 {
   if(m_stations)
   {
-    return m_positionReportRenderer->RenderOverlay(pmdc, vp, m_stations);
+    return m_positionReportRenderer->RenderOverlay(dc, vp, m_stations);
   }
   else
   {

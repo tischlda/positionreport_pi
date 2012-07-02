@@ -39,7 +39,7 @@
 #define     PLUGIN_VERSION_MINOR    1
 
 #define     MY_API_VERSION_MAJOR    1
-#define     MY_API_VERSION_MINOR    5
+#define     MY_API_VERSION_MINOR    6
 
 #include "../../../include/ocpn_plugin.h"
 #include "positionreportfile.h"
@@ -50,7 +50,7 @@
 class PositionReportUIDialog;
 class PositionReportRenderer;
 
-class positionreport_pi : public opencpn_plugin
+class positionreport_pi : public opencpn_plugin_16
 {
   public:
     positionreport_pi(void *ppimgr);
@@ -67,7 +67,7 @@ class positionreport_pi : public opencpn_plugin
     wxString GetShortDescription();
     wxString GetLongDescription();
 
-    bool RenderOverlay(wxMemoryDC *pmdc, PlugIn_ViewPort *vp);
+    bool RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp);
     void SetCursorLatLon(double lat, double lon);
 
     int GetToolbarToolCount(void);
