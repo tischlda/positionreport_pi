@@ -1,0 +1,6 @@
+Plugin for OpenCPN to display position reports.
+
+The plugin currently supports the following formats of position reports which can be requested through Winlink 2000:
+
+- List of 30 WL2K mobiles closest to ones last reported position, found in AirMail under Window->Catalogs->WL2K->Global->WL2K_USERS->WL2K_NEARBY
+- List of positions for a given callsign, found in AirMail under Window->Winlink-2000->Position Request
