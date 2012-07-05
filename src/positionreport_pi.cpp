@@ -55,7 +55,7 @@ extern "C" DECL_EXP void destroy_pi(opencpn_plugin* p)
 #include "icons.h"
 
 positionreport_pi::positionreport_pi(void *ppimgr)
-      :opencpn_plugin_16(ppimgr)
+      :opencpn_plugin_18(ppimgr)
 {
   initialize_images();
 
@@ -176,6 +176,7 @@ void positionreport_pi::OnDialogClose()
 
 bool positionreport_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 {
+  wxLogMessage(_T("positionreport_pi::RenderOverlay"));
   if(m_stations)
   {
     return m_positionReportRenderer->RenderOverlay(dc, vp, m_stations);

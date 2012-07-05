@@ -39,7 +39,7 @@
 #define     PLUGIN_VERSION_MINOR    1
 
 #define     MY_API_VERSION_MAJOR    1
-#define     MY_API_VERSION_MINOR    6
+#define     MY_API_VERSION_MINOR    8
 
 #include "../../../include/ocpn_plugin.h"
 #include "positionreportfile.h"
@@ -50,7 +50,7 @@
 class PositionReportUIDialog;
 class PositionReportRenderer;
 
-class positionreport_pi : public opencpn_plugin_16
+class positionreport_pi : public opencpn_plugin_18
 {
   public:
     positionreport_pi(void *ppimgr);
